@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan:*)",
+      "Bash(php -l \"app/Filament/Petugas/Resources/NasabahResource.php\")",
+      "Bash(php -l \"app/Filament/Petugas/Resources/HargaSampahResource.php\")",
+      "Bash(php -l \"app/Filament/Petugas/Resources/AktivitasPetugasResource.php\")",
+      "Bash(php -l \"app/Filament/Petugas/Pages/ProfilPetugas.php\")",
+      "Bash(php -l \"app/Models/AktivitasPetugas.php\")"
+    ]
+  }
+}
