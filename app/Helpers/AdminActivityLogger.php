@@ -59,3 +59,5 @@ class AdminActivityLogger
         self::log('delete', "Menghapus data {$modul}: {$namaData}", $modul, $dataId);
     }
 }
+
+// test
