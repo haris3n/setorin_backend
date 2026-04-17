@@ -106,7 +106,7 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # Masuk ke folder project
-            cd /home/${{ secrets.SERVER_USER }}/RPL2B-Kelompok-8
+            cd /home/${{ secrets.SERVER_USER }}/DOSEN
 
             # Pull image terbaru
             docker pull ghcr.io/${{ github.repository }}:latest
@@ -125,5 +125,3 @@ jobs:
             docker compose exec -T app php artisan migrate --force --no-interaction
 
             echo "✅ Deployment selesai!"
-            sleep 2
-            exit 0
