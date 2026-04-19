@@ -56,3 +56,8 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 80
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+# Install Node & build frontend
+COPY package*.json ./
+RUN npm ci
+RUN npm run build
