@@ -2,17 +2,14 @@ version: '3.8'
 services:
   app:
     build: .
+    volumes:
+      - ./.env:/var/www/html/.env
     ports:
       - "8090:80"
-    environment:
-      - APP_ENV=local
-      - APP_KEY=${APP_KEY}
-      - DB_HOST=db
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       - db
+    networks:
+      - app-network
 
   db:
     image: mysql:8.0
@@ -23,6 +20,11 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - app-network
 
 volumes:
   db_data:
+
+networks:
+  app-network:

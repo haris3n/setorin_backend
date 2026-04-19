@@ -42,7 +42,7 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts
 # ✅ npm build di sini, SEBELUM CMD
 RUN npm ci
 RUN npm run build
-
+RUN php artisan filament:assets
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf
@@ -50,5 +50,5 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 80
 
-RUN php artisan filament:assets
+
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
