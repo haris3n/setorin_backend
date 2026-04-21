@@ -75,6 +75,8 @@ return [
 
         'deferred' => [
             'driver' => 'deferred',
+            'timeout' => 55,
+            'retry_after' => 90,
         ],
 
         'background' => [
