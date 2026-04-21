@@ -31,6 +31,10 @@ class TransaksiPenyetoran extends Model
         'catatan',
     ];
 
+    protected $casts = [
+        'tgl_setor' => 'datetime',
+    ];
+
     // --- Relationships ---
 
     /**

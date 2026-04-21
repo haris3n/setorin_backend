@@ -1,0 +1,19 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+    level: 5
+    excludePaths:
+        - app/Filament/Petugas/Pages/ProfilPetugas.php
+    ignoreErrors:
+        -
+            identifier: accessScreen.property
+            path: app/Filament/Petugas/Pages/ProfilPetugas.php
+        -
+            message: '#Relation .* is not found in App\\Models\\BankSampah#'
+            path: app/Http/Controllers/Api/Admin/BankSampahController.php
+        -
+            message: '#Relation .* is not found in App\\Models\\BankSampah#'
+            path: app/Http/Controllers/Api/Nasabah/TransaksiController.php

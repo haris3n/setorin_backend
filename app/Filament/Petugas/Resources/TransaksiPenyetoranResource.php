@@ -74,7 +74,6 @@ class TransaksiPenyetoranResource extends Resource
                                 ->options(
                                     HargaSampah::where('id_bank_sampah', $idBankSampah)
                                         ->where('status', 'aktif')
-                                        ->get()
                                         ->pluck('jenis_sampah', 'id')
                                 )
                                 ->required()
@@ -132,9 +131,10 @@ class TransaksiPenyetoranResource extends Resource
                     ->label('Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'pending'    => 'warning',
-                        'selesai'    => 'success',
-                        'dibatalkan' => 'danger',
+                        'pending'     => 'warning',
+                        'selesai'     => 'success',
+                        'dibatalkan'  => 'danger',
+                        default       => 'secondary',
                     }),
 
                 Tables\Columns\TextColumn::make('tgl_setor')

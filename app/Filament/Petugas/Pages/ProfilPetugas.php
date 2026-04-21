@@ -4,7 +4,7 @@ namespace App\Filament\Petugas\Pages;
 
 use App\Models\AktivitasPetugas;
 use App\Models\User;
-use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Form;
@@ -15,6 +15,8 @@ use Illuminate\Validation\ValidationException;
 class ProfilPetugas extends Page
 {
     use InteractsWithForms;
+
+    /** @property Form $form */
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 
@@ -99,7 +101,10 @@ class ProfilPetugas extends Page
             );
         }
 
-        Filament::notify('success', 'Profil berhasil diperbarui.');
+        Notification::make()
+            ->success()
+            ->title('Profil berhasil diperbarui.')
+            ->send();
 
         // Refresh form with new data
         $this->form->fill($user->toArray());

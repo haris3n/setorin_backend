@@ -71,7 +71,7 @@ class MisiController extends Controller
         }
 
         // 3. Proses Klaim menggunakan Transaction
-        return DB::transaction(function () use ($request, $misi, $userId) {
+        return DB::transaction(function () use ($misi, $userId) {
             
             // Catat di tabel Klaim Misi
             KlaimMisi::create([

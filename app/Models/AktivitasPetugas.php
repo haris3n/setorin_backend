@@ -27,8 +27,7 @@ class AktivitasPetugas extends Model
 
     public function pengguna(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id_petugas', 'id')
-            ->via('petugas');
+        return $this->belongsTo(User::class, 'id_petugas', 'id');
     }
 
     /**
