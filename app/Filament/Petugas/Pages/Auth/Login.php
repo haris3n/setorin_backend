@@ -3,17 +3,24 @@
 namespace App\Filament\Petugas\Pages\Auth;
 
 use Filament\Pages\Auth\Login as BaseLogin;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 class Login extends BaseLogin
 {
-    protected static string $view = 'filament.petugas.login';
-
-    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getHeading(): string|Htmlable
     {
-        return 'Selamat Datang, Petugas';
+        return new HtmlString('
+            <div class="role-badge petugas-badge">
+                <span class="pulse-dot"></span>
+                PETUGAS OPERASIONAL
+            </div>
+            
+            <span style="display:block;text-align:center;">Selamat Datang, Petugas</span>
+        ');
     }
 
-    public function getSubHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public function getSubHeading(): string|Htmlable|null
     {
         return 'Masuk untuk memproses transaksi penyetoran sampah.';
     }

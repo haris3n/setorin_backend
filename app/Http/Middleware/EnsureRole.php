@@ -17,10 +17,10 @@ class EnsureRole
      */
     public function handle(Request $request, Closure $next, string $role)
     {
-        if (!$request->user()?->hasRole($role)) {
+        if ($request->user()?->role !== $role) {
             abort(403, 'Akun ini tidak memiliki akses ke portal ini.');
         }
 
-        return $next($request);
+    return $next($request);
     }
 }

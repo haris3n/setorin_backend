@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 // Pastikan ini sesuai dengan nama folder di sidebar VS Code kamu (UserResource atau Users)
 use App\Filament\Admin\Resources\UserResource\Pages; 
 use App\Models\User;
+use App\Models\BankSampah;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -74,7 +75,19 @@ class UserResource extends Resource
                                 'admin' => 'Admin',
                             ])
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->reactive(),
+
+                        Forms\Components\Select::make('id_bank_sampah')
+                            ->label('Bank Sampah')
+                            ->options(BankSampah::where('status', 'aktif')->pluck('nama_bank', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required(fn (callable $get) => in_array($get('role'), ['petugas', 'nasabah']))
+                            ->visible(fn (callable $get) => in_array($get('role'), ['petugas', 'nasabah']))
+                            ->native(false)
+                            ->helperText('Pilih bank sampah tempat pengguna ini bertugas/terdaftar')
+                            ->dehydrated(false),
 
                         Forms\Components\Select::make('status_akun')
                             ->label('Status Akun')

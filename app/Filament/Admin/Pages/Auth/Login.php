@@ -3,17 +3,24 @@
 namespace App\Filament\Admin\Pages\Auth;
 
 use Filament\Pages\Auth\Login as BaseLogin;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 class Login extends BaseLogin
 {
-    protected static string $view = 'filament.admin.login';
-
-    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getHeading(): string|Htmlable
     {
-        return 'Masuk sebagai Admin';
+        return new HtmlString('
+            <div class="role-badge admin-badge">
+                <span class="pulse-dot"></span>
+                ADMINISTRATOR
+            </div>
+            
+            <span style="display:block;text-align:center;">Masuk sebagai Admin</span>
+        ');
     }
 
-    public function getSubHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public function getSubHeading(): string|Htmlable|null
     {
         return 'Kelola sistem Setor.in dengan penuh tanggung jawab.';
     }

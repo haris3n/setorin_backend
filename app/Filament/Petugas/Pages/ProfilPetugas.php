@@ -7,16 +7,15 @@ use App\Models\User;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class ProfilPetugas extends Page
+class ProfilPetugas extends Page implements HasForms
 {
     use InteractsWithForms;
-
-    /** @property Form $form */
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 
@@ -30,48 +29,43 @@ class ProfilPetugas extends Page
 
     public function mount(): void
     {
-        $this->form->fill(Auth::user()->toArray());
-    }
-
-    protected function getFormSchema(): array
-    {
-        return [
-            TextInput::make('nama')
-                ->label('Nama Lengkap')
-                ->required()
-                ->maxLength(255),
-
-            TextInput::make('email')
-                ->label('Email')
-                ->email()
-                ->required()
-                ->maxLength(255),
-
-            TextInput::make('no_telepon')
-                ->label('Nomor Telepon')
-                ->tel()
-                ->required()
-                ->maxLength(20),
-
-            TextInput::make('alamat')
-                ->label('Alamat')
-                ->maxLength(500)
-                ->columnSpanFull(),
-        ];
+        $this->form->fill(
+            Auth::user()->only(['nama', 'email', 'no_telepon', 'alamat'])
+        );
     }
 
     public function form(Form $form): Form
     {
         return $form
-            ->schema($this->getFormSchema())
-            ->statePath('data')
-            ->model(Auth::user());
+            ->schema([
+                TextInput::make('nama')
+                    ->label('Nama Lengkap')
+                    ->required()
+                    ->maxLength(255),
+
+                TextInput::make('email')
+                    ->label('Email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255),
+
+                TextInput::make('no_telepon')
+                    ->label('Nomor Telepon')
+                    ->tel()
+                    ->required()
+                    ->maxLength(20),
+
+                TextInput::make('alamat')
+                    ->label('Alamat')
+                    ->maxLength(500)
+                    ->columnSpanFull(),
+            ])
+            ->statePath('data');
     }
 
     public function submit(): void
     {
         $data = $this->form->getState();
-
         $user = Auth::user();
 
         // Validasi email unik
@@ -86,10 +80,10 @@ class ProfilPetugas extends Page
         }
 
         $user->update([
-            'nama' => $data['nama'],
-            'email' => $data['email'],
+            'nama'       => $data['nama'],
+            'email'      => $data['email'],
             'no_telepon' => $data['no_telepon'],
-            'alamat' => $data['alamat'] ?? $user->alamat,
+            'alamat'     => $data['alamat'] ?? $user->alamat,
         ]);
 
         // Log aktivitas
@@ -106,7 +100,7 @@ class ProfilPetugas extends Page
             ->title('Profil berhasil diperbarui.')
             ->send();
 
-        // Refresh form with new data
-        $this->form->fill($user->toArray());
+        // Refresh form
+        $this->form->fill($user->only(['nama', 'email', 'no_telepon', 'alamat']));
     }
 }

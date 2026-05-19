@@ -12,8 +12,29 @@ class BankSampah extends Model
         'nama_bank',
         'alamat',
         'no_telepon',
+        'email',
+        'logo',
+        'latitude',
+        'longitude',
         'status',
     ];
+
+    // Computed location untuk Map field
+    public function getLocationAttribute(): array
+    {
+        return [
+            'lat' => (float) $this->latitude,
+            'lng' => (float) $this->longitude,
+        ];
+    }
+
+    public function setLocationAttribute(?array $value): void
+    {
+        if (is_array($value)) {
+            $this->attributes['latitude'] = $value['lat'] ?? null;
+            $this->attributes['longitude'] = $value['lng'] ?? null;
+        }
+    }
 
     public function hargaSampah() {
         return $this->hasMany(HargaSampah::class, 'id_bank_sampah');

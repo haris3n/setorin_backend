@@ -16,4 +16,16 @@ class EditBankSampah extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    // Redirect ke list setelah update
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    // Notifikasi sukses
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'Bank Sampah berhasil diupdate!';
+    }
 }

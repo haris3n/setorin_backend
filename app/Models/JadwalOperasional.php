@@ -24,6 +24,7 @@ class JadwalOperasional extends Model
         'hari',
         'jam_buka',
         'jam_tutup',
+        'is_active',
     ];
 
     // --- Relationships ---

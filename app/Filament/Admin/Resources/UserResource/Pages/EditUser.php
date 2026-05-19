@@ -3,6 +3,8 @@
 namespace App\Filament\Admin\Resources\UserResource\Pages;
 
 use App\Filament\Admin\Resources\UserResource;
+use App\Models\Nasabah;
+use App\Models\Petugas;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -15,5 +17,41 @@ class EditUser extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    /**
+     * Hydrate id_bank_sampah dari tabel petugas/nasabah ke form
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $record = $this->record;
+
+        if ($record->role === 'petugas' && $record->petugas) {
+            $data['id_bank_sampah'] = $record->petugas->id_bank_sampah;
+        } elseif ($record->role === 'nasabah' && $record->nasabah) {
+            $data['id_bank_sampah'] = $record->nasabah->id_bank_sampah;
+        }
+
+        return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        $record = $this->record;
+        $bankSampahId = $this->data['id_bank_sampah'] ?? null;
+
+        if ($record->role === 'petugas' && $bankSampahId) {
+            Petugas::updateOrCreate(
+                ['id_pengguna' => $record->id],
+                ['id_bank_sampah' => $bankSampahId]
+            );
+        }
+
+        if ($record->role === 'nasabah' && $bankSampahId) {
+            Nasabah::updateOrCreate(
+                ['id_pengguna' => $record->id],
+                ['id_bank_sampah' => $bankSampahId]
+            );
+        }
     }
 }
