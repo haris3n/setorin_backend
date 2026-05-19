@@ -39,7 +39,16 @@ jobs:
           php-version: '8.2'
           extensions: pdo, pdo_mysql, mbstring, bcmath, zip, gd, intl, xml
 
-      # ✅ FIX: Build Vite assets supaya manifest.json ada saat testing
+      # ✅ URUTAN PENTING: composer install HARUS sebelum npm run build
+      # karena tailwind.config.js melakukan import dari vendor/filament/support/
+      # yang baru tersedia setelah composer install dijalankan
+      - name: Install Composer dependencies
+        run: |
+          composer install \
+            --no-progress \
+            --prefer-dist \
+            --no-interaction
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -50,13 +59,6 @@ jobs:
         run: |
           npm ci
           npm run build
-
-      - name: Install Composer dependencies
-        run: |
-          composer install \
-            --no-progress \
-            --prefer-dist \
-            --no-interaction
 
       - name: Copy & configure .env untuk testing
         run: |
