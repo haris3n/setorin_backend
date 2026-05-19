@@ -86,7 +86,9 @@ jobs:
         run: php artisan migrate --force
 
       - name: Run tests
-        run: php artisan test --parallel
+        # ✅ FIX: Gunakan ProcessRunner karena WrapperRunner tidak kompatibel dengan PHPUnit 11.5.x
+        # WrapperRunner memanggil wasSuccessfulIgnoringPhpunitWarnings() yang sudah dihapus di PHPUnit 11.x
+        run: php artisan test --parallel --runner ProcessRunner
 
   # ─── JOB 2: BUILD & PUSH IMAGE ────────────────────────────
   build-and-push:
