@@ -71,6 +71,13 @@ jobs:
           sed -i 's/^DB_DATABASE=.*/DB_DATABASE=testing/' .env
           sed -i 's/^DB_USERNAME=.*/DB_USERNAME=root/' .env
           sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=root/' .env
+          # ✅ FIX: Gunakan driver array supaya tidak butuh tabel cache/session di DB
+          # Tabel 'cache' dan 'sessions' tidak ada di testing DB dan tidak dibutuhkan saat test
+          sed -i 's/^CACHE_STORE=.*/CACHE_STORE=array/' .env
+          sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env
+          # Jika CACHE_STORE belum ada di .env.example, tambahkan manual
+          grep -q '^CACHE_STORE=' .env || echo 'CACHE_STORE=array' >> .env
+          grep -q '^SESSION_DRIVER=' .env || echo 'SESSION_DRIVER=array' >> .env
 
       - name: Generate app key
         run: php artisan key:generate --force
