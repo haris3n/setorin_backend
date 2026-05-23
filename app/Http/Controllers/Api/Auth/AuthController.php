@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\{User, OtpVerifikasi, Saldo, Nasabah};
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\{Hash, Validator, DB, Cache};
+use Illuminate\Support\Facades\{Hash, Validator, DB, Cache, Mail, Log};
+use App\Mail\OtpMail;
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -56,9 +57,17 @@ class AuthController extends Controller
                 'status_otp'  => 'aktif',
             ]);
 
+            // Kirim email OTP
+            try {
+                Mail::to($user->email)->send(new OtpMail($otpCode));
+            } catch (\Exception $e) {
+                // Jangan gagalkan registrasi jika email gagal terkirim (misal karena limit/koneksi)
+                Log::error('Gagal mengirim email OTP: ' . $e->getMessage());
+            }
+
             return response()->json([
                 'status'  => true,
-                'message' => 'Registrasi berhasil. Silakan verifikasi kode OTP Anda.',
+                'message' => 'Registrasi berhasil. Silakan cek email Anda untuk verifikasi kode OTP.',
                 'otp_dev' => $otpCode, // TODO: Hapus pada environment production
             ], 201);
         });
@@ -94,8 +103,9 @@ class AuthController extends Controller
             $user->update(['status_akun' => 'aktif']);
             $otp->update(['status_otp' => 'terpakai']);
 
-            // Assign Role (Pastikan guard sudah sesuai di config/auth.php)
-            $user->assignRole('nasabah');
+            // Assign Role (Pastikan guard sudah sesuai dengan database)
+            $role = \Spatie\Permission\Models\Role::findByName('nasabah', 'api');
+            $user->assignRole($role);
 
             // Inisialisasi data Nasabah & Saldo awal
             Nasabah::firstOrCreate(['id_pengguna' => $user->id]);
@@ -218,3 +228,5 @@ class AuthController extends Controller
         Cache::forget($lockedKey);
     }
 }
+
+

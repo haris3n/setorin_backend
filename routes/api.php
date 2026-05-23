@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\Nasabah\{ProfilController, TransaksiController, SaldoController, MisiController};
+use App\Http\Controllers\Api\Nasabah\{ProfilController, TransaksiController, SaldoController, MisiController, DashboardController};
 use App\Http\Controllers\Api\Petugas\{TransaksiPetugasController, JadwalController};
 use App\Http\Controllers\Api\Admin\{PenggunaController, BankSampahController, HargaSampahController, MisiAdminController, PenarikanController, LaporanController, KontenEdukasiController};
 
@@ -28,6 +28,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // ── NASABAH ──────────────────────────────────────────────
     Route::middleware('role:nasabah')->prefix('nasabah')->group(function () {
+        Route::get('/dashboard',            [DashboardController::class, 'index']);
+        Route::get('/aktivitas',             [DashboardController::class, 'aktivitas']);
         Route::get('/profil',               [ProfilController::class, 'show']);
         Route::put('/profil',               [ProfilController::class, 'update']);
         Route::get('/notifikasi',           [ProfilController::class, 'notifikasi']);

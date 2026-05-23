@@ -24,6 +24,10 @@ class KontenEdukasiResource extends Resource
     {
         return $form->schema([
             Forms\Components\Section::make('Detail Konten')->schema([
+                Forms\Components\Hidden::make('id_pengguna')
+                    ->default(fn () => Auth::id())
+                    ->dehydrated(true),
+
                 Forms\Components\TextInput::make('judul')
                     ->required()
                     ->maxLength(255)
@@ -32,15 +36,18 @@ class KontenEdukasiResource extends Resource
                 
                 Forms\Components\Select::make('kategori')
                     ->options([
-                        'sampah_organik'   => 'Sampah Organik',
-                        'sampah_anorganik' => 'Sampah Anorganik',
-                        'daur_ulang'       => 'Daur Ulang',
-                        'lingkungan'       => 'Lingkungan Hidup',
-                        'tips_praktis'     => 'Tips Praktis',
+                        'Kertas'      => 'Kertas',
+                        'Plastik'     => 'Plastik',
+                        'Kaca'        => 'Kaca',
+                        'Organik'     => 'Organik',
+                        'Logam'       => 'Logam',
+                        'Elektronik'  => 'Elektronik',
                     ])
-                    ->label('Kategori')
+                    ->required()
+                    ->label('Kategori Sampah')
                     ->searchable()
-                    ->native(false),
+                    ->native(false)
+                    ->helperText('Pilih kategori yang sesuai dengan filter di aplikasi mobile'),
 
                 Forms\Components\DatePicker::make('tgl_publikasi')
                     ->label('Tanggal Publikasi')
@@ -105,11 +112,12 @@ class KontenEdukasiResource extends Resource
                     ]),
                 Tables\Filters\SelectFilter::make('kategori')
                     ->options([
-                        'sampah_organik' => 'Sampah Organik', 
-                        'sampah_anorganik' => 'Sampah Anorganik',
-                        'daur_ulang' => 'Daur Ulang', 
-                        'lingkungan' => 'Lingkungan Hidup', 
-                        'tips_praktis' => 'Tips Praktis',
+                        'Kertas'      => 'Kertas',
+                        'Plastik'     => 'Plastik',
+                        'Kaca'        => 'Kaca',
+                        'Organik'     => 'Organik',
+                        'Logam'       => 'Logam',
+                        'Elektronik'  => 'Elektronik',
                     ]),
             ])
             ->actions([

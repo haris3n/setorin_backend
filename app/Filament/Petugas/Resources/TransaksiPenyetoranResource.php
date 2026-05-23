@@ -35,20 +35,62 @@ class TransaksiPenyetoranResource extends Resource
         $idBankSampah = $petugas?->id_bank_sampah;
 
         return $form->schema([
-            Forms\Components\Section::make('Data Nasabah')
-                ->description('Pilih nasabah yang terdaftar di bank sampah Anda.')
+            Forms\Components\Section::make('Identifikasi & Data Nasabah')
+                ->description('Wajib melakukan scan QR Code kartu nasabah terlebih dahulu.')
                 ->schema([
-                    Forms\Components\Select::make('id_nasabah')
-                        ->label('Nasabah')
-                        ->options(
-                            Nasabah::where('id_bank_sampah', $idBankSampah)
-                                ->with('pengguna')
-                                ->get()
-                                ->pluck('pengguna.nama', 'id')
-                        )
-                        ->required()
-                        ->searchable()
-                        ->preload(),
+                    // Scanner Widget custom
+                    Forms\Components\View::make('filament.components.qr-scanner')
+                        ->columnSpanFull(),
+
+                    // Hidden scan_code to catch scanned text and trigger lookup
+                    Forms\Components\Hidden::make('scan_code')
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if (empty($state)) return;
+
+                            // Cari pengguna dengan role nasabah berdasarkan no_telepon atau ID
+                            $user = \App\Models\User::where('role', 'nasabah')
+                                ->where(function ($query) use ($state) {
+                                    $query->where('no_telepon', $state)
+                                          ->orWhere('id', $state);
+                                })
+                                ->first();
+
+                            if ($user && $user->nasabah) {
+                                $set('id_nasabah', $user->nasabah->id);
+                                $set('nasabah_nama', $user->nama);
+                                $set('nasabah_no_telepon', $user->no_telepon);
+                                
+                                // Bersihkan input scan_code agar siap untuk scan berikutnya jika perlu
+                                $set('scan_code', null);
+                            }
+                        }),
+
+                    // Hidden id_nasabah to store selected customer
+                    Forms\Components\Hidden::make('id_nasabah')
+                        ->required(),
+
+                    Forms\Components\TextInput::make('nasabah_nama')
+                        ->label('Nama Lengkap Nasabah')
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->placeholder('Akan terisi otomatis setelah di-scan')
+                        ->afterStateHydrated(function ($state, callable $set, $record) {
+                            if ($record && $record->nasabah && $record->nasabah->pengguna) {
+                                $set('nasabah_nama', $record->nasabah->pengguna->nama);
+                            }
+                        }),
+
+                    Forms\Components\TextInput::make('nasabah_no_telepon')
+                        ->label('No. Handphone Nasabah')
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->placeholder('Akan terisi otomatis setelah di-scan')
+                        ->afterStateHydrated(function ($state, callable $set, $record) {
+                            if ($record && $record->nasabah && $record->nasabah->pengguna) {
+                                $set('nasabah_no_telepon', $record->nasabah->pengguna->no_telepon);
+                            }
+                        }),
 
                     // Hidden fields untuk otomatisasi data
                     Forms\Components\Hidden::make('id_bank_sampah')
@@ -113,6 +155,11 @@ class TransaksiPenyetoranResource extends Resource
 
                 Tables\Columns\TextColumn::make('nasabah.pengguna.nama')
                     ->label('Nasabah')
+                    ->searchable()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('nasabah.pengguna.no_telepon')
+                    ->label('No. Handphone')
                     ->searchable()
                     ->sortable(),
 
