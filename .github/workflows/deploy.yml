@@ -195,6 +195,8 @@ jobs:
             echo "🏃 Menjalankan migrasi..."
             docker compose exec -T app php artisan migrate --force --no-interaction
 
+            sleep 5
+
             # ── Cleanup image lama ────────────────────────
             echo "🧹 Membersihkan image lama..."
             docker image prune -f
