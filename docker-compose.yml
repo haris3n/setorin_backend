@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
     networks:
-      - app-network
+      - app-network //test
 
   db:
     image: mysql:8.0
