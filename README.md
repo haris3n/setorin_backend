@@ -128,6 +128,3 @@ php artisan cache:clear
 
 ```
 
-```
-
-```
