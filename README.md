@@ -8,10 +8,12 @@ Repositori ini adalah backend untuk platform **Setorin**. Ikuti langkah-langkah 
 
 ### 1. Clone Repositori
 Jika belum melakukan clone, jalankan perintah berikut di terminal Anda:
+
 ```bash
 git clone git@github.com:haris3n/setorin_backend.git
 cd setorin_backend
 
+```
 
 ### 2. Install Dependencies (Composer)
 
