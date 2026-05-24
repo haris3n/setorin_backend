@@ -1,4 +1,3 @@
-```markdown
 # Setorin Backend - Project Setup Guide
 
 Repositori ini adalah backend untuk platform **Setorin**. Ikuti langkah-langkah di bawah ini untuk melakukan setup project di lingkungan lokal setelah melakukan `git clone`.
@@ -13,7 +12,6 @@ Jika belum melakukan clone, jalankan perintah berikut di terminal Anda:
 git clone git@github.com:haris3n/setorin_backend.git
 cd setorin_backend
 
-```
 
 ### 2. Install Dependencies (Composer)
 
