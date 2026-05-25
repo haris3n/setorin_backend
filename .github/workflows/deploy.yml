@@ -168,6 +168,9 @@ jobs:
             # Pull image terbaru
             docker pull ghcr.io/$GITHUB_REPOSITORY:latest
 
+            # ✅ FIX: Hapus container lama yang mungkin tidak terdeteksi compose
+            docker rm -f setorin setorin-db 2>/dev/null || true
+
             # Update container (zero-downtime dengan --no-deps)
             docker compose up -d --remove-orphans
 
