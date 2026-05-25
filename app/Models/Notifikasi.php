@@ -21,10 +21,16 @@ class Notifikasi extends Model
      */
     protected $fillable = [
         'id_pengguna',
+        'id_transaksi',
         'judul',
         'pesan',
         'tipe',
         'status_notifikasi',
+        'memerlukan_konfirmasi',
+    ];
+
+    protected $casts = [
+        'memerlukan_konfirmasi' => 'boolean',
     ];
 
     // --- Relationships ---
@@ -35,5 +41,10 @@ class Notifikasi extends Model
     public function pengguna(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_pengguna');
+    }
+
+    public function transaksi(): BelongsTo
+    {
+        return $this->belongsTo(TransaksiPenyetoran::class, 'id_transaksi');
     }
 }

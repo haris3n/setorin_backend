@@ -85,32 +85,28 @@ class TransaksiPetugasController extends Controller
                 $totalKoin  += $koin;
             }
 
-            // 3. Update Header Transaksi dengan Totalan
+            // 3. Update header — menunggu konfirmasi nasabah (koin belum masuk)
             $transaksi->update([
                 'total_berat_kg' => $totalBerat,
                 'total_koin'     => $totalKoin,
-                'status'         => 'selesai',
+                'status'         => 'diproses',
             ]);
 
-            // 4. Tambahkan Koin ke Nasabah
             $nasabah = Nasabah::find($request->id_nasabah);
-            Koin::create([
-                'id_pengguna' => $nasabah->id_pengguna,
-                'jumlah_koin' => $totalKoin,
-                'sumber'      => 'transaksi'
-            ]);
 
-            // 5. Kirim Notifikasi ke Nasabah
             Notifikasi::create([
-                'id_pengguna'       => $nasabah->id_pengguna,
-                'judul'             => 'Setoran Sampah Berhasil!',
-                'pesan'             => "Anda mendapatkan {$totalKoin} koin dari setoran seberat {$totalBerat} kg.",
-                'status_notifikasi' => 'belum_dibaca'
+                'id_pengguna'           => $nasabah->id_pengguna,
+                'id_transaksi'          => $transaksi->id,
+                'judul'                 => 'Konfirmasi Setoran Sampah',
+                'pesan'                 => "Petugas mencatat setoran {$totalBerat} kg (estimasi {$totalKoin} koin). Buka aplikasi dan tekan Konfirmasi jika data sudah sesuai.",
+                'tipe'                  => 'transaksi',
+                'status_notifikasi'     => 'belum_dibaca',
+                'memerlukan_konfirmasi' => true,
             ]);
 
             return response()->json([
                 'status'  => true,
-                'message' => 'Transaksi berhasil dicatat dan koin telah dikirim ke nasabah.',
+                'message' => 'Transaksi tercatat. Menunggu konfirmasi nasabah di aplikasi.',
                 'data'    => $transaksi->load('detail')
             ], 201);
         });

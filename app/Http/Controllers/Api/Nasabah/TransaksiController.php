@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api\Nasabah;
 
 use App\Http\Controllers\Controller;
-use App\Models\{BankSampah, Nasabah, TransaksiPenyetoran};
+use App\Models\{BankSampah, Nasabah, TransaksiPenyetoran, Koin, Notifikasi};
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
 {
@@ -111,5 +112,95 @@ class TransaksiController extends Controller
             'status'  => true,
             'message' => 'Laporan rencana setoran berhasil dikirim. Silakan datang ke Bank Sampah terkait.'
         ]);
+    }
+
+    /**
+     * Nasabah mengonfirmasi transaksi setelah petugas input data di bank sampah.
+     * POST /api/nasabah/transaksi/{id}/konfirmasi
+     */
+    public function konfirmasi(Request $request, int $id): JsonResponse
+    {
+        $nasabah = $request->user()->nasabah;
+
+        if (! $nasabah) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Profil nasabah tidak ditemukan.',
+            ], 404);
+        }
+
+        $transaksi = TransaksiPenyetoran::where('id', $id)
+            ->where('id_nasabah', $nasabah->id)
+            ->first();
+
+        if (! $transaksi) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Transaksi tidak ditemukan.',
+            ], 404);
+        }
+
+        if ($transaksi->status === 'selesai') {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Transaksi ini sudah dikonfirmasi sebelumnya.',
+            ], 422);
+        }
+
+        if ($transaksi->status === 'dibatalkan') {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Transaksi ini telah dibatalkan.',
+            ], 422);
+        }
+
+        if ($transaksi->status !== 'diproses') {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Transaksi tidak dapat dikonfirmasi pada status saat ini.',
+            ], 422);
+        }
+
+        return DB::transaction(function () use ($transaksi, $request) {
+            $userId = $request->user()->id;
+            $totalKoin = (int) $transaksi->total_koin;
+            $totalBerat = (float) $transaksi->total_berat_kg;
+
+            Koin::create([
+                'id_pengguna' => $userId,
+                'jumlah_koin' => $totalKoin,
+                'sumber'      => 'transaksi',
+            ]);
+
+            $transaksi->update(['status' => 'selesai']);
+
+            Notifikasi::where('id_pengguna', $userId)
+                ->where('id_transaksi', $transaksi->id)
+                ->where('memerlukan_konfirmasi', true)
+                ->update([
+                    'memerlukan_konfirmasi' => false,
+                    'status_notifikasi'     => 'dibaca',
+                ]);
+
+            Notifikasi::create([
+                'id_pengguna'           => $userId,
+                'id_transaksi'          => $transaksi->id,
+                'judul'                 => 'Setoran Berhasil Dikonfirmasi',
+                'pesan'                 => "Anda mendapatkan {$totalKoin} koin dari setoran seberat {$totalBerat} kg.",
+                'tipe'                  => 'transaksi',
+                'status_notifikasi'     => 'belum_dibaca',
+                'memerlukan_konfirmasi' => false,
+            ]);
+
+            return response()->json([
+                'status'  => true,
+                'message' => "Setoran dikonfirmasi. {$totalKoin} koin telah masuk ke akun Anda.",
+                'data'    => [
+                    'id_transaksi' => $transaksi->id,
+                    'total_koin'   => $totalKoin,
+                    'status'       => 'selesai',
+                ],
+            ]);
+        });
     }
 }

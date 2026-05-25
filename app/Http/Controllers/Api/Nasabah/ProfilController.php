@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Nasabah;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\NasabahQrCode;
 use App\Models\{Notifikasi, KontenEdukasi};
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -24,6 +25,7 @@ class ProfilController extends Controller
         // Menggabungkan data user dengan total_koin tanpa merusak struktur array asli
         $userData = $user->toArray();
         $userData['total_koin'] = $totalKoin;
+        $userData['qr_code'] = NasabahQrCode::encode($user->id);
 
         return response()->json([
             'status' => true,
@@ -66,9 +68,10 @@ class ProfilController extends Controller
             ->orderByDesc('created_at')
             ->paginate(15);
 
-        // Tandai yang belum dibaca secara otomatis saat halaman dibuka
+        // Tandai dibaca kecuali yang masih menunggu konfirmasi nasabah
         Notifikasi::where('id_pengguna', $userId)
             ->where('status_notifikasi', 'belum_dibaca')
+            ->where('memerlukan_konfirmasi', false)
             ->update(['status_notifikasi' => 'dibaca']);
 
         return response()->json([

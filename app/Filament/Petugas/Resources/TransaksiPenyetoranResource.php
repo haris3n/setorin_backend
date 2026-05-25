@@ -3,7 +3,8 @@
 namespace App\Filament\Petugas\Resources;
 
 use App\Filament\Petugas\Resources\TransaksiPenyetoranResource\Pages;
-use App\Models\{TransaksiPenyetoran, HargaSampah, Nasabah};
+use App\Helpers\NasabahQrCode;
+use App\Models\{TransaksiPenyetoran, HargaSampah, Nasabah, User};
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -48,13 +49,20 @@ class TransaksiPenyetoranResource extends Resource
                         ->afterStateUpdated(function ($state, callable $set) {
                             if (empty($state)) return;
 
-                            // Cari pengguna dengan role nasabah berdasarkan no_telepon atau ID
-                            $user = \App\Models\User::where('role', 'nasabah')
-                                ->where(function ($query) use ($state) {
-                                    $query->where('no_telepon', $state)
-                                          ->orWhere('id', $state);
-                                })
-                                ->first();
+                            // QR resmi: SETORIN:NASABAH:{id} — fallback: no telepon / id numerik
+                            $user = null;
+                            $qrUserId = NasabahQrCode::parseUserId($state);
+                            if ($qrUserId) {
+                                $user = User::where('role', 'nasabah')->where('id', $qrUserId)->first();
+                            }
+                            if (! $user) {
+                                $user = User::where('role', 'nasabah')
+                                    ->where(function ($query) use ($state) {
+                                        $query->where('no_telepon', $state)
+                                              ->orWhere('id', $state);
+                                    })
+                                    ->first();
+                            }
 
                             if ($user && $user->nasabah) {
                                 $set('id_nasabah', $user->nasabah->id);
@@ -179,9 +187,17 @@ class TransaksiPenyetoranResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'pending'     => 'warning',
+                        'diproses'    => 'info',
                         'selesai'     => 'success',
                         'dibatalkan'  => 'danger',
                         default       => 'secondary',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'diproses' => 'Menunggu Konfirmasi',
+                        'selesai'  => 'Selesai',
+                        'pending'  => 'Pending',
+                        'dibatalkan' => 'Dibatalkan',
+                        default => $state,
                     }),
 
                 Tables\Columns\TextColumn::make('tgl_setor')
@@ -198,6 +214,7 @@ class TransaksiPenyetoranResource extends Resource
                     ->label('Status')
                     ->options([
                         'pending' => 'Pending',
+                        'diproses' => 'Menunggu Konfirmasi',
                         'selesai' => 'Selesai',
                         'dibatalkan' => 'Dibatalkan',
                     ]),

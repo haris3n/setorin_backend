@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/bank-sampah',          [TransaksiController::class, 'listBankSampah']);
         Route::post('/bank-sampah/pilih',   [TransaksiController::class, 'pilihBankSampah']);
         Route::get('/transaksi',            [TransaksiController::class, 'riwayat']);
+        Route::post('/transaksi/{id}/konfirmasi', [TransaksiController::class, 'konfirmasi']);
         Route::post('/laporan-sampah',      [TransaksiController::class, 'laporkanSampah']);
 
         Route::get('/saldo',                [SaldoController::class, 'show']);
