@@ -1,0 +1,35 @@
+services:
+  app:
+    image: ghcr.io/haris3n/setorin_backend:latest
+    container_name: setorin
+    restart: always
+    ports:
+      - "8090:80"
+    env_file:
+      - .env
+    volumes:
+      - ./.env:/var/www/html/.env
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: setorin-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: haris
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
