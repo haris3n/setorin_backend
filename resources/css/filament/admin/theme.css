@@ -1,18 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-@import '../../../../vendor/filament/filament/resources/css/base.css';
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
 
-/* Wajib untuk panel admin (warna, sidebar, dark mode) — tanpa ini production tampil hitam/polos */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@tailwind variants;
-
-@config '../../../../tailwind.config.js';
+@config 'tailwind.config.js';
 
 /* BASE */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* ══ ICON SIZE FIX ══ */
+/* ICON SIZE FIX */
 svg, .fi-icon, [class*="icon"] svg {
     width: 1.25rem;
     height: 1.25rem;
@@ -22,11 +16,7 @@ svg, .fi-icon, [class*="icon"] svg {
     height: 1.5rem;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   LOGIN PAGE ONLY STYLES
-   ══════════════════════════════════════════════════════════════ */
-
-/* ══ BACKGROUND — SOFT LIGHT NATURE ══ */
+/* LOGIN PAGE ONLY STYLES */
 .fi-simple-layout {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
     min-height: 100vh !important;
@@ -67,7 +57,6 @@ svg, .fi-icon, [class*="icon"] svg {
     to   { transform: translate(-20px,-30px) scale(1.05); }
 }
 
-/* ══ CARD ══ */
 .fi-simple-main {
     position: relative !important;
     z-index: 10 !important;
@@ -102,7 +91,6 @@ svg, .fi-icon, [class*="icon"] svg {
     border-radius: 0 0 4px 4px;
 }
 
-/* ══ BRAND ══ */
 .fi-logo, .fi-simple-main [class*="brand"] {
     font-size: 20px !important;
     font-weight: 800 !important;
@@ -112,7 +100,6 @@ svg, .fi-icon, [class*="icon"] svg {
     display: block !important;
 }
 
-/* ══ ROLE BADGE ══ */
 .role-badge {
     display: inline-flex !important;
     align-items: center !important;
@@ -141,7 +128,6 @@ svg, .fi-icon, [class*="icon"] svg {
     50%      { opacity:0.7; transform:scale(1.2); box-shadow:0 0 0 6px rgba(22,163,74,0); }
 }
 
-/* ══ HEADING ══ */
 .fi-simple-main h1, h1.fi-simple-heading {
     font-size: 26px !important;
     font-weight: 800 !important;
@@ -163,11 +149,9 @@ svg, .fi-icon, [class*="icon"] svg {
     text-align: center !important; margin-bottom: 6px !important;
 }
 
-/* ══ FORM SPACING ══ */
 .fi-simple-main form, .fi-simple-main .fi-form { margin-top: 32px !important; }
 .fi-simple-main .fi-fo-field-wrp, .fi-simple-main .fi-form-field-wrapper { margin-bottom: 22px !important; }
 
-/* ══ LABEL — LOGIN PAGE ONLY ══ */
 .fi-simple-main label {
     font-size: 13px !important;
     font-weight: 600 !important;
@@ -180,9 +164,8 @@ svg, .fi-icon, [class*="icon"] svg {
     visibility: visible !important;
 }
 
-/* ══ INPUT — LOGIN PAGE ONLY ══ */
-.fi-simple-main input[type="email"], 
-.fi-simple-main input[type="password"], 
+.fi-simple-main input[type="email"],
+.fi-simple-main input[type="password"],
 .fi-simple-main input[type="text"] {
     height: 48px !important;
     background: #FFFFFF !important;
@@ -206,7 +189,6 @@ svg, .fi-icon, [class*="icon"] svg {
     outline: none !important;
 }
 
-/* ══ PASSWORD TOGGLE BUTTON ══ */
 .fi-simple-main .fi-input-wrp {
     position: relative !important;
     width: 100% !important;
@@ -229,11 +211,10 @@ svg, .fi-icon, [class*="icon"] svg {
     color: #6B7280 !important;
 }
 
-/* ══ REMEMBER ME — LOGIN PAGE ONLY ══ */
 .fi-simple-main input[type="checkbox"] {
-    width: 18px !important; 
+    width: 18px !important;
     height: 18px !important;
-    cursor: pointer !important; 
+    cursor: pointer !important;
     border-radius: 4px !important;
     border: 2px solid #D1D5DB !important;
     background-color: #FFFFFF !important;
@@ -271,17 +252,16 @@ svg, .fi-icon, [class*="icon"] svg {
     cursor: pointer !important;
 }
 
-/* ══ TOMBOL MASUK — LOGIN PAGE ONLY ══ */
 .fi-simple-main button[type="submit"] {
-    width: 100% !important; 
+    width: 100% !important;
     height: 50px !important;
     border-radius: 12px !important;
-    font-size: 15px !important; 
+    font-size: 15px !important;
     font-weight: 700 !important;
     background: linear-gradient(135deg, #16A34A 0%, #15803D 100%) !important;
-    color: #FFFFFF !important; 
+    color: #FFFFFF !important;
     border: none !important;
-    cursor: pointer !important; 
+    cursor: pointer !important;
     margin-top: 4px !important;
     letter-spacing: 0.02em !important;
     transition: all 0.2s ease !important;
@@ -293,7 +273,6 @@ svg, .fi-icon, [class*="icon"] svg {
     transform: translateY(-1px) !important;
 }
 
-/* ══ RESPONSIVE ══ */
 @media (max-width: 520px) {
     .fi-simple-main { padding: 36px 24px !important; border-radius: 20px !important; }
     .fi-simple-main h1 { font-size: 22px !important; }

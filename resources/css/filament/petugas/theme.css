@@ -1,13 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-@import '../../../../vendor/filament/filament/resources/css/base.css';
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
 
-/* Wajib untuk panel petugas (warna, sidebar, dark mode) */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@tailwind variants;
-
-@config '../../../../tailwind.config.js';
+@config 'tailwind.config.js';
 
 /* BASE */
 *, *::before, *::after { box-sizing: border-box; }
