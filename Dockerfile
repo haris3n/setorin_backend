@@ -37,11 +37,12 @@ COPY . .
 
 RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache
 
-RUN composer install --optimize-autoloader --no-dev --no-scripts
+RUN composer install --optimize-autoloader --no-dev --no-interaction
 
-# ✅ npm build di sini, SEBELUM CMD
+# Build asset Vite + Filament (wajib untuk CSS/theme production)
 RUN npm ci
 RUN npm run build
+RUN test -f public/build/manifest.json || (echo "Vite build gagal: manifest tidak ada" && exit 1)
 RUN php artisan filament:assets
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
