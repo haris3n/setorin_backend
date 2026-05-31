@@ -31,6 +31,10 @@ class PetugasPanelProvider extends PanelProvider
             ->brandName('Setor.in Petugas')
             ->colors([
                 'primary' => Color::hex('#16A34A'),
+                'success' => Color::hex('#16A34A'),
+                'info'    => Color::hex('#3B82F6'),
+                'warning' => Color::hex('#F59E0B'),
+                'danger'  => Color::hex('#EF4444'),
             ])
             // Lokasi Resource, Pages, dan Widgets khusus Panel Petugas
             ->discoverResources(in: app_path('Filament/Petugas/Resources'), for: 'App\\Filament\\Petugas\\Resources')

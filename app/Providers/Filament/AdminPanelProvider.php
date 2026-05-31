@@ -26,7 +26,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(\App\Filament\Admin\Pages\Auth\Login::class)
-            ->colors(['primary' => Color::hex('#16A34A')])
+            ->colors([
+                'primary' => Color::hex('#16A34A'),
+                'success' => Color::hex('#16A34A'),
+                'info'    => Color::hex('#3B82F6'),
+                'warning' => Color::hex('#F59E0B'),
+                'danger'  => Color::hex('#EF4444'),
+            ])
             ->brandName('Setor.in Admin')
             ->discoverResources(
                 in: app_path('Filament/Admin/Resources'),
