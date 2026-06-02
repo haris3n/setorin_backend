@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Nasabah;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Saldo, Koin, PenarikanSaldo, Notifikasi};
+use App\Models\{Saldo, Koin, PenarikanSaldo, Notifikasi, HargaCoin};
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -59,7 +59,11 @@ class SaldoController extends Controller
             ], 422);
         }
 
-        $nilaiSaldo = $request->jumlah_koin * 10; // Konfigurasi: 1 koin = Rp 10
+        // Ambil harga koin yang aktif dari database, jika tidak ada default ke 100
+        $hargaCoinRecord = HargaCoin::where('status', 'aktif')->first();
+        $hargaPerKoin = $hargaCoinRecord ? (int) $hargaCoinRecord->harga_per_coin : 100;
+
+        $nilaiSaldo = $request->jumlah_koin * $hargaPerKoin; // Konversi dinamis dari admin
 
         return DB::transaction(function () use ($request, $userId, $nilaiSaldo) {
             // 1. Kurangi koin (catat sebagai transaksi keluar/negatif)
@@ -69,8 +73,11 @@ class SaldoController extends Controller
                 'sumber'      => 'tukar_saldo' // Label sumber lebih spesifik
             ]);
 
-            // 2. Tambah saldo
-            $saldo = Saldo::where('id_pengguna', $userId)->first();
+            // 2. Tambah saldo (buat record jika belum ada)
+            $saldo = Saldo::firstOrCreate(
+                ['id_pengguna' => $userId],
+                ['jumlah_saldo' => 0, 'tgl_update' => now()]
+            );
             $saldo->increment('jumlah_saldo', $nilaiSaldo);
             $saldo->update(['tgl_update' => now()]);
 
