@@ -9,6 +9,10 @@ class AktivitasPetugas extends Model
 {
     protected $table = 'aktivitas_petugas';
 
+    // Tabel ini hanya punya created_at (tidak ada updated_at)
+    public $timestamps = false;
+    const CREATED_AT = 'created_at';
+
     protected $fillable = [
         'id_petugas',
         'jenis_aktivitas',
