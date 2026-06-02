@@ -83,7 +83,10 @@ svg, .fi-icon, [class*="icon"] svg {
     from { opacity:0; transform:translateY(30px) scale(0.97); }
     to   { opacity:1; transform:translateY(0) scale(1); }
 }
-.fi-simple-main, .fi-simple-main * {
+.fi-simple-layout,
+.fi-simple-main,
+.fi-simple-main .fi-fo-field-wrp-label,
+.fi-simple-main .fi-btn {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
 }
 .fi-simple-main::before {
@@ -135,160 +138,179 @@ svg, .fi-icon, [class*="icon"] svg {
     50%      { opacity:0.7; transform:scale(1.2); box-shadow:0 0 0 6px rgba(22,163,74,0); }
 }
 
-/* ══ HEADING ══ */
-.fi-simple-main h1, h1.fi-simple-heading {
-    font-size: 26px !important;
+.fi-simple-layout .fi-simple-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+}
+
+.fi-simple-main h1.fi-simple-header-heading,
+.fi-simple-main h1.fi-simple-heading {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.login-heading-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+    width: 100% !important;
+}
+
+.login-heading-title {
+    display: block !important;
+    font-size: 1.5rem !important;
     font-weight: 800 !important;
     color: #111827 !important;
-    line-height: 1.25 !important;
-    margin-top: 10px !important;
-    margin-bottom: 6px !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.025em !important;
     text-align: center !important;
-    letter-spacing: -0.5px !important;
 }
-.fi-simple-main p.fi-simple-subheading, p.fi-simple-subheading {
+
+.role-badge {
+    margin: 0 auto !important;
+}
+
+.fi-simple-main .fi-simple-header-subheading {
     font-size: 14px !important;
     color: #6B7280 !important;
     text-align: center !important;
     line-height: 1.6 !important;
+    margin-top: 0.25rem !important;
     margin-bottom: 0 !important;
-}
-.fi-simple-main > header, .fi-simple-main > div > header {
-    text-align: center !important; margin-bottom: 6px !important;
-}
-
-/* ══ FORM SPACING ══ */
-.fi-simple-main form, .fi-simple-main .fi-form { margin-top: 32px !important; }
-.fi-simple-main .fi-fo-field-wrp, .fi-simple-main .fi-form-field-wrapper { margin-bottom: 22px !important; }
-
-/* ══ LABEL — LOGIN PAGE ONLY ══ */
-.fi-simple-main label {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #111827 !important;
-    letter-spacing: 0.01em !important;
-    margin-bottom: 8px !important;
-    display: block !important;
-    text-transform: none !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* ══ INPUT — LOGIN PAGE ONLY ══ */
-.fi-simple-main input[type="email"], 
-.fi-simple-main input[type="password"], 
-.fi-simple-main input[type="text"] {
-    height: 48px !important;
-    background: #FFFFFF !important;
-    border: 1.5px solid #D1FAE5 !important;
-    border-radius: 12px !important;
-    padding: 0 44px 0 16px !important;
-    font-size: 15px !important;
-    color: #111827 !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    transition: border-color 0.2s, box-shadow 0.2s !important;
-    caret-color: #16A34A !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-}
-.fi-simple-main input::placeholder {
-    color: #9CA3AF !important;
-}
-.fi-simple-main input:focus {
-    border-color: #16A34A !important;
-    box-shadow: 0 0 0 3px rgba(22,163,74,0.12) !important;
-    outline: none !important;
-}
-
-/* ══ PASSWORD TOGGLE BUTTON ══ */
-.fi-simple-main .fi-input-wrp {
-    position: relative !important;
-    width: 100% !important;
-}
-.fi-simple-main .fi-input-wrp input {
-    padding-right: 48px !important;
-}
-.fi-simple-main .fi-input-wrp button {
-    position: absolute !important;
-    right: 12px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+    max-width: 22rem !important;
     background: transparent !important;
-    border: none !important;
-    cursor: pointer !important;
-    padding: 4px !important;
-    color: #9CA3AF !important;
-}
-.fi-simple-main .fi-input-wrp button:hover {
-    color: #6B7280 !important;
 }
 
-/* ══ REMEMBER ME — LOGIN PAGE ONLY ══ */
-.fi-simple-main input[type="checkbox"] {
-    width: 18px !important; 
-    height: 18px !important;
-    cursor: pointer !important; 
-    border-radius: 4px !important;
-    border: 2px solid #D1D5DB !important;
-    background-color: #FFFFFF !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    position: relative !important;
-    transition: all 0.2s ease !important;
-    flex-shrink: 0 !important;
-    margin: 0 !important;
-}
-.fi-simple-main input[type="checkbox"]:hover {
-    border-color: #16A34A !important;
-    box-shadow: 0 0 0 3px rgba(22,163,74,0.08) !important;
-}
-.fi-simple-main input[type="checkbox"]:checked {
-    background-color: #16A34A !important;
-    border-color: #16A34A !important;
-}
-.fi-simple-main input[type="checkbox"]:checked::after {
-    content: '✓' !important;
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    color: #FFFFFF !important;
-    font-size: 13px !important;
-    font-weight: bold !important;
-}
-.fi-simple-main label:has(input[type="checkbox"]) {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    font-size: 14px !important;
-    color: #374151 !important;
-    cursor: pointer !important;
+.fi-simple-main form,
+.fi-simple-main .fi-form {
+    margin-top: 0 !important;
+    gap: 1.25rem !important;
 }
 
-/* ══ TOMBOL MASUK — LOGIN PAGE ONLY ══ */
-.fi-simple-main button[type="submit"] {
-    width: 100% !important; 
-    height: 50px !important;
+.fi-simple-layout .fi-fo-field-wrp {
+    gap: 0.5rem !important;
+}
+
+.fi-simple-layout .fi-fo-field-wrp-label {
+    margin-bottom: 0.25rem !important;
+}
+
+.fi-simple-layout .fi-fo-field-wrp-label span {
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+}
+
+.fi-simple-main .fi-btn-color-primary {
+    width: 100% !important;
+    min-height: 50px !important;
     border-radius: 12px !important;
-    font-size: 15px !important; 
+    font-size: 15px !important;
     font-weight: 700 !important;
     background: linear-gradient(135deg, #16A34A 0%, #15803D 100%) !important;
-    color: #FFFFFF !important; 
-    border: none !important;
-    cursor: pointer !important; 
-    margin-top: 4px !important;
-    letter-spacing: 0.02em !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 4px 18px rgba(22,163,74,0.35) !important;
+    box-shadow: 0 4px 18px rgba(22, 163, 74, 0.35) !important;
 }
-.fi-simple-main button[type="submit"]:hover {
+.fi-simple-main .fi-btn-color-primary:hover {
     background: linear-gradient(135deg, #15803D 0%, #166534 100%) !important;
-    box-shadow: 0 6px 26px rgba(22,163,74,0.45) !important;
-    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 26px rgba(22, 163, 74, 0.45) !important;
+}
+
+.fi-simple-layout .fi-fo-field-wrp-label,
+.fi-simple-layout .fi-fo-field-wrp-label span,
+.fi-simple-layout .fi-simple-header-subheading,
+.fi-simple-layout font {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.fi-simple-layout .fi-fo-field-wrp-label span {
+    color: rgb(3 7 18) !important;
+}
+
+.fi-simple-layout .fi-fo-field-wrp-label:has(.fi-checkbox-input) {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    cursor: pointer !important;
+}
+
+.fi-simple-layout .fi-fo-field-wrp-label:has(.fi-checkbox-input) span {
+    color: rgb(55 65 81) !important;
+    font-size: 0.875rem !important;
+}
+
+.fi-simple-layout ::selection {
+    background-color: rgba(22, 163, 74, 0.25) !important;
+    color: rgb(17 24 39) !important;
+}
+
+.fi-simple-layout .fi-input-wrp {
+    background-color: #f0fdf4 !important;
+    border: 1.5px solid #bbf7d0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(22, 163, 74, 0.08) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.fi-simple-layout .fi-input-wrp:focus-within {
+    border-color: #16a34a !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15) !important;
+}
+
+.fi-simple-layout .fi-input-wrp .fi-input {
+    min-height: 3rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    background-color: #ffffff !important;
+    font-size: 0.9375rem !important;
+}
+
+.fi-simple-layout .fi-input-wrp .fi-input::placeholder {
+    color: #9ca3af !important;
+}
+
+.fi-simple-layout .fi-fo-field-wrp:has(.fi-checkbox-input) {
+    margin-top: 0.25rem !important;
+}
+
+.fi-simple-layout .fi-fo-field-wrp-label:has(.fi-checkbox-input) {
+    padding: 0.625rem 0.875rem !important;
+    background-color: #f0fdf4 !important;
+    border: 1.5px solid #bbf7d0 !important;
+    border-radius: 10px !important;
+    width: fit-content !important;
+}
+
+.fi-simple-layout .fi-checkbox-input {
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    background-color: #ffffff !important;
+    border: 2px solid #86efac !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.fi-simple-layout .fi-checkbox-input:checked {
+    background-color: #16a34a !important;
+    border-color: #16a34a !important;
+}
+
+.fi-simple-main .fi-form-actions {
+    margin-top: 0.5rem !important;
 }
 
 /* ══ RESPONSIVE ══ */
 @media (max-width: 520px) {
     .fi-simple-main { padding: 36px 24px !important; border-radius: 20px !important; }
-    .fi-simple-main h1 { font-size: 22px !important; }
+    .login-heading-title { font-size: 1.25rem !important; }
 }

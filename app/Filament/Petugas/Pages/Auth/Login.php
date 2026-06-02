@@ -11,12 +11,13 @@ class Login extends BaseLogin
     public function getHeading(): string|Htmlable
     {
         return new HtmlString('
-            <div class="role-badge petugas-badge">
-                <span class="pulse-dot"></span>
-                PETUGAS OPERASIONAL
+            <div class="login-heading-stack">
+                <div class="role-badge petugas-badge">
+                    <span class="pulse-dot"></span>
+                    PETUGAS OPERASIONAL
+                </div>
+                <span class="login-heading-title">Selamat Datang, Petugas</span>
             </div>
-            
-            <span style="display:block;text-align:center;">Selamat Datang, Petugas</span>
         ');
     }
 

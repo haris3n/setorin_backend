@@ -10,6 +10,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\View\PanelsRenderHook;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -65,6 +66,10 @@ class PetugasPanelProvider extends PanelProvider
                 \App\Http\Middleware\EnsureRole::class . ':petugas',
             ])
             ->viteTheme('resources/css/filament/petugas/theme.css')
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => '<meta name="google" content="notranslate" />',
+            )
             ->authGuard('web');
     }
 }

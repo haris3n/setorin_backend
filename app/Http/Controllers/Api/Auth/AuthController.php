@@ -108,7 +108,10 @@ class AuthController extends Controller
             $user->assignRole($role);
 
             // Inisialisasi data Nasabah & Saldo awal
-            Nasabah::firstOrCreate(['id_pengguna' => $user->id]);
+            Nasabah::firstOrCreate(
+                ['id_pengguna' => $user->id],
+                ['tgl_bergabung' => Carbon::now()->toDateString()]
+            );
             Saldo::firstOrCreate(
                 ['id_pengguna' => $user->id],
                 ['jumlah_saldo' => 0]

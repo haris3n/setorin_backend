@@ -8,6 +8,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\View\PanelsRenderHook;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -72,6 +73,10 @@ class AdminPanelProvider extends PanelProvider
                 \App\Http\Middleware\EnsureRole::class . ':admin',
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => '<meta name="google" content="notranslate" />',
+            )
             ->authGuard('web');
     }
 }

@@ -6,5 +6,6 @@ export default {
         './app/Filament/Petugas/**/*.php',
         './resources/views/filament/petugas/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
+        './resources/css/filament/petugas/theme.css',
     ],
 }
