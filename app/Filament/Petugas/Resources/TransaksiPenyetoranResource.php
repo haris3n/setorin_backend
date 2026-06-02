@@ -193,9 +193,9 @@ class TransaksiPenyetoranResource extends Resource
                         default       => 'secondary',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'diproses' => 'Menunggu Konfirmasi',
+                        'diproses' => 'Menunggu Petugas',
                         'selesai'  => 'Selesai',
-                        'pending'  => 'Pending',
+                        'pending'  => 'Menunggu Nasabah',
                         'dibatalkan' => 'Dibatalkan',
                         default => $state,
                     }),
@@ -213,8 +213,8 @@ class TransaksiPenyetoranResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Status')
                     ->options([
-                        'pending' => 'Pending',
-                        'diproses' => 'Menunggu Konfirmasi',
+                        'pending' => 'Menunggu Nasabah',
+                        'diproses' => 'Menunggu Petugas',
                         'selesai' => 'Selesai',
                         'dibatalkan' => 'Dibatalkan',
                     ]),
@@ -240,6 +240,51 @@ class TransaksiPenyetoranResource extends Resource
                     ->color('warning')
                     ->visible(fn ($record) => $record->status !== 'selesai' && $record->status !== 'dibatalkan')
                     ->tooltip('Hanya transaksi yang belum selesai yang dapat diedit'),
+                Tables\Actions\Action::make('konfirmasi')
+                    ->label('Konfirmasi')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->status === 'diproses')
+                    ->requiresConfirmation()
+                    ->modalHeading('Konfirmasi Transaksi')
+                    ->modalDescription('Apakah Anda yakin ingin mengonfirmasi transaksi ini? Koin akan ditambahkan ke akun nasabah.')
+                    ->action(function ($record) {
+                        \Illuminate\Support\Facades\DB::transaction(function () use ($record) {
+                            $record->update(['status' => 'selesai']);
+
+                            $totalKoin = (int) $record->total_koin;
+                            $totalBerat = (float) $record->total_berat_kg;
+
+                            \App\Models\Koin::create([
+                                'id_pengguna' => $record->nasabah->id_pengguna,
+                                'jumlah_koin' => $totalKoin,
+                                'sumber'      => 'transaksi',
+                            ]);
+
+                            \App\Models\Notifikasi::where('id_pengguna', $record->nasabah->id_pengguna)
+                                ->where('id_transaksi', $record->id)
+                                ->where('memerlukan_konfirmasi', true)
+                                ->update([
+                                    'memerlukan_konfirmasi' => false,
+                                    'status_notifikasi'     => 'dibaca',
+                                ]);
+
+                            \App\Models\Notifikasi::create([
+                                'id_pengguna'           => $record->nasabah->id_pengguna,
+                                'id_transaksi'          => $record->id,
+                                'judul'                 => 'Setoran Berhasil Dikonfirmasi (oleh Petugas)',
+                                'pesan'                 => "Anda mendapatkan {$totalKoin} koin dari setoran seberat {$totalBerat} kg yang dikonfirmasi petugas.",
+                                'tipe'                  => 'transaksi',
+                                'status_notifikasi'     => 'belum_dibaca',
+                                'memerlukan_konfirmasi' => false,
+                            ]);
+                        });
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Transaksi Selesai')
+                            ->body('Koin telah berhasil ditambahkan ke akun nasabah.')
+                            ->send();
+                    }),
             ])
             ->bulkActions([]);
     }

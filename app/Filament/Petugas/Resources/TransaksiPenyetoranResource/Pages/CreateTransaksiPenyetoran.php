@@ -24,7 +24,7 @@ class CreateTransaksiPenyetoran extends CreateRecord
                 'id_bank_sampah' => $data['id_bank_sampah'],
                 'id_petugas'     => $data['id_petugas'],
                 'catatan'        => $data['catatan'] ?? null,
-                'status'         => 'diproses',
+                'status'         => 'pending',
                 'tgl_setor'      => now(),
             ]);
 
@@ -48,7 +48,7 @@ class CreateTransaksiPenyetoran extends CreateRecord
             $transaksi->update([
                 'total_berat_kg' => $totalBerat,
                 'total_koin'     => $totalKoin,
-                'status'         => 'diproses',
+                'status'         => 'pending',
             ]);
 
             $nasabah = Nasabah::findOrFail($data['id_nasabah']);

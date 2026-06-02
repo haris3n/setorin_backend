@@ -62,7 +62,7 @@ class TransaksiPetugasController extends Controller
                 'id_nasabah'     => $request->id_nasabah,
                 'id_bank_sampah' => $petugas->id_bank_sampah,
                 'id_petugas'     => $petugas->id,
-                'status'         => 'diproses',
+                'status'         => 'pending',
                 'catatan'        => $request->catatan,
             ]);
 
@@ -89,7 +89,7 @@ class TransaksiPetugasController extends Controller
             $transaksi->update([
                 'total_berat_kg' => $totalBerat,
                 'total_koin'     => $totalKoin,
-                'status'         => 'diproses',
+                'status'         => 'pending',
             ]);
 
             $nasabah = Nasabah::find($request->id_nasabah);
@@ -116,20 +116,52 @@ class TransaksiPetugasController extends Controller
      * Mengonfirmasi transaksi secara manual (jika diperlukan).
      * PATCH /api/petugas/transaksi/{id}/konfirmasi
      */
-    public function konfirmasi($id): JsonResponse
+    public function konfirmasi(Request $request, $id): JsonResponse
     {
         $transaksi = TransaksiPenyetoran::findOrFail($id);
         
-        if ($transaksi->status === 'selesai') {
-            return response()->json(['status' => false, 'message' => 'Transaksi sudah selesai.'], 422);
+        if ($transaksi->status !== 'diproses') {
+            return response()->json(['status' => false, 'message' => 'Transaksi belum dikonfirmasi nasabah atau sudah selesai.'], 422);
         }
 
-        $transaksi->update(['status' => 'selesai']);
+        return DB::transaction(function () use ($transaksi, $request) {
+            $transaksi->update(['status' => 'selesai']);
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Status transaksi berhasil diperbarui menjadi selesai.'
-        ]);
+            $totalKoin = (int) $transaksi->total_koin;
+            $totalBerat = (float) $transaksi->total_berat_kg;
+
+            // Tambahkan koin ke nasabah
+            Koin::create([
+                'id_pengguna' => $transaksi->nasabah->id_pengguna,
+                'jumlah_koin' => $totalKoin,
+                'sumber'      => 'transaksi',
+            ]);
+
+            // Update notifikasi lama (hapus flag memerlukan konfirmasi)
+            Notifikasi::where('id_pengguna', $transaksi->nasabah->id_pengguna)
+                ->where('id_transaksi', $transaksi->id)
+                ->where('memerlukan_konfirmasi', true)
+                ->update([
+                    'memerlukan_konfirmasi' => false,
+                    'status_notifikasi'     => 'dibaca',
+                ]);
+
+            // Buat notifikasi baru bahwa setoran berhasil
+            Notifikasi::create([
+                'id_pengguna'           => $transaksi->nasabah->id_pengguna,
+                'id_transaksi'          => $transaksi->id,
+                'judul'                 => 'Setoran Berhasil Dikonfirmasi (oleh Petugas)',
+                'pesan'                 => "Anda mendapatkan {$totalKoin} koin dari setoran seberat {$totalBerat} kg yang dikonfirmasi petugas.",
+                'tipe'                  => 'transaksi',
+                'status_notifikasi'     => 'belum_dibaca',
+                'memerlukan_konfirmasi' => false,
+            ]);
+
+            return response()->json([
+                'status'  => true,
+                'message' => "Status transaksi berhasil diperbarui menjadi selesai. {$totalKoin} koin ditambahkan ke nasabah."
+            ]);
+        });
     }
 }
 

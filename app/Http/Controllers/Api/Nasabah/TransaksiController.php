@@ -154,7 +154,7 @@ class TransaksiController extends Controller
             ], 422);
         }
 
-        if ($transaksi->status !== 'diproses') {
+        if ($transaksi->status !== 'pending') {
             return response()->json([
                 'status'  => false,
                 'message' => 'Transaksi tidak dapat dikonfirmasi pada status saat ini.',
@@ -166,13 +166,7 @@ class TransaksiController extends Controller
             $totalKoin = (int) $transaksi->total_koin;
             $totalBerat = (float) $transaksi->total_berat_kg;
 
-            Koin::create([
-                'id_pengguna' => $userId,
-                'jumlah_koin' => $totalKoin,
-                'sumber'      => 'transaksi',
-            ]);
-
-            $transaksi->update(['status' => 'selesai']);
+            $transaksi->update(['status' => 'diproses']);
 
             Notifikasi::where('id_pengguna', $userId)
                 ->where('id_transaksi', $transaksi->id)
@@ -185,8 +179,8 @@ class TransaksiController extends Controller
             Notifikasi::create([
                 'id_pengguna'           => $userId,
                 'id_transaksi'          => $transaksi->id,
-                'judul'                 => 'Setoran Berhasil Dikonfirmasi',
-                'pesan'                 => "Anda mendapatkan {$totalKoin} koin dari setoran seberat {$totalBerat} kg.",
+                'judul'                 => 'Setoran Dikonfirmasi, Menunggu Petugas',
+                'pesan'                 => "Anda telah menyetujui setoran seberat {$totalBerat} kg. Menunggu konfirmasi akhir dari petugas sebelum {$totalKoin} koin masuk.",
                 'tipe'                  => 'transaksi',
                 'status_notifikasi'     => 'belum_dibaca',
                 'memerlukan_konfirmasi' => false,
@@ -194,11 +188,10 @@ class TransaksiController extends Controller
 
             return response()->json([
                 'status'  => true,
-                'message' => "Setoran dikonfirmasi. {$totalKoin} koin telah masuk ke akun Anda.",
+                'message' => "Setoran dikonfirmasi. Menunggu konfirmasi akhir dari petugas.",
                 'data'    => [
                     'id_transaksi' => $transaksi->id,
-                    'total_koin'   => $totalKoin,
-                    'status'       => 'selesai',
+                    'status'       => 'diproses',
                 ],
             ]);
         });
