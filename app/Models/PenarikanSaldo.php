@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PenarikanSaldo extends Model
 {
     /**
+     * Nonaktifkan timestamps karena tabel penarikan_saldo menggunakan tgl_penarikan manual.
+     */
+    public $timestamps = false;
+
+    /**
      * Nama tabel yang dikaitkan dengan model.
      *
      * @var string

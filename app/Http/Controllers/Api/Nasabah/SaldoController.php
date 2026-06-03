@@ -68,9 +68,10 @@ class SaldoController extends Controller
         return DB::transaction(function () use ($request, $userId, $nilaiSaldo) {
             // 1. Kurangi koin (catat sebagai transaksi keluar/negatif)
             Koin::create([
-                'id_pengguna' => $userId,
-                'jumlah_koin' => -$request->jumlah_koin,
-                'sumber'      => 'tukar_saldo' // Label sumber lebih spesifik
+                'id_pengguna'  => $userId,
+                'jumlah_koin'  => -$request->jumlah_koin,
+                'tgl_diperoleh' => now(),
+                'sumber'       => 'tukar_saldo'
             ]);
 
             // 2. Tambah saldo (buat record jika belum ada)

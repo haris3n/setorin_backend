@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Koin extends Model
 {
     /**
+     * Nonaktifkan timestamps karena tabel koin tidak punya created_at/updated_at.
+     */
+    public $timestamps = false;
+
+    /**
      * Nama tabel yang dikaitkan dengan model.
      *
      * @var string

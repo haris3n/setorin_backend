@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Saldo extends Model
 {
     /**
+     * Nonaktifkan timestamps karena tabel saldo menggunakan tgl_update manual.
+     */
+    public $timestamps = false;
+
+    /**
      * Nama tabel yang dikaitkan dengan model.
      *
      * @var string
