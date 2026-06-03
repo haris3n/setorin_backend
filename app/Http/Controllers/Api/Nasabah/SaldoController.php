@@ -71,7 +71,7 @@ class SaldoController extends Controller
                 'id_pengguna'  => $userId,
                 'jumlah_koin'  => -$request->jumlah_koin,
                 'tgl_diperoleh' => now(),
-                'sumber'       => 'tukar_saldo'
+                'sumber'       => 'transaksi' // Harus sesuai ENUM di database ('transaksi' atau 'misi')
             ]);
 
             // 2. Tambah saldo (buat record jika belum ada)
