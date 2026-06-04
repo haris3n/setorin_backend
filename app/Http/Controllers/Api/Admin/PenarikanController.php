@@ -23,6 +23,11 @@ class PenarikanController extends Controller
         return response()->json(['status' => true, 'data' => $data]);
     }
 
+    /**
+     * Setujui penarikan saldo.
+     * Saldo aktif sudah dipotong sejak pengajuan (hold balance).
+     * Di sini kita hanya mengurangi saldo_tertahan.
+     */
     public function setujui($id): JsonResponse
     {
         return DB::transaction(function () use ($id) {
@@ -35,9 +40,9 @@ class PenarikanController extends Controller
             // 1. Update status penarikan
             $p->update(['status' => 'disetujui']);
 
-            // 2. Potong saldo nasabah secara permanen
+            // 2. Kurangi saldo_tertahan (dana keluar secara permanen)
             $saldo = Saldo::findOrFail($p->id_saldo);
-            $saldo->decrement('jumlah_saldo', $p->jumlah_tarik);
+            $saldo->decrement('saldo_tertahan', $p->jumlah_tarik);
             $saldo->update(['tgl_update' => now()]);
 
             // 3. Beri Notifikasi
@@ -48,27 +53,41 @@ class PenarikanController extends Controller
                 'tipe'        => 'saldo',
             ]);
 
-            return response()->json(['status' => true, 'message' => 'Penarikan berhasil disetujui dan saldo telah dipotong.']);
+            return response()->json(['status' => true, 'message' => 'Penarikan berhasil disetujui dan dana telah dikirim.']);
         });
     }
 
+    /**
+     * Tolak penarikan saldo.
+     * Kembalikan dana dari saldo_tertahan ke saldo aktif (refund).
+     */
     public function tolak(Request $request, $id): JsonResponse
     {
-        $p = PenarikanSaldo::findOrFail($id);
+        return DB::transaction(function () use ($request, $id) {
+            $p = PenarikanSaldo::findOrFail($id);
 
-        if ($p->status !== 'pending') {
-            return response()->json(['status' => false, 'message' => 'Transaksi sudah tidak bisa diubah.'], 422);
-        }
+            if ($p->status !== 'pending') {
+                return response()->json(['status' => false, 'message' => 'Transaksi sudah tidak bisa diubah.'], 422);
+            }
 
-        $p->update(['status' => 'ditolak']);
+            // 1. Update status
+            $p->update(['status' => 'ditolak']);
 
-        Notifikasi::create([
-            'id_pengguna' => $p->id_pengguna,
-            'judul'       => 'Penarikan Ditolak',
-            'pesan'       => 'Mohon maaf, penarikan Anda ditolak. Alasan: ' . ($request->alasan ?? 'Data tidak valid.'),
-            'tipe'        => 'saldo',
-        ]);
+            // 2. Refund: kembalikan saldo_tertahan ke saldo aktif
+            $saldo = Saldo::findOrFail($p->id_saldo);
+            $saldo->decrement('saldo_tertahan', $p->jumlah_tarik);
+            $saldo->increment('jumlah_saldo', $p->jumlah_tarik);
+            $saldo->update(['tgl_update' => now()]);
 
-        return response()->json(['status' => true, 'message' => 'Permintaan penarikan telah ditolak.']);
+            // 3. Notifikasi
+            Notifikasi::create([
+                'id_pengguna' => $p->id_pengguna,
+                'judul'       => 'Penarikan Ditolak',
+                'pesan'       => 'Mohon maaf, penarikan Rp ' . number_format($p->jumlah_tarik, 0, ',', '.') . ' ditolak. Alasan: ' . ($request->alasan ?? 'Data tidak valid.') . ' Dana telah dikembalikan ke saldo Anda.',
+                'tipe'        => 'saldo',
+            ]);
+
+            return response()->json(['status' => true, 'message' => 'Permintaan penarikan telah ditolak dan saldo dikembalikan.']);
+        });
     }
 }

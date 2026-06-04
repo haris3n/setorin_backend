@@ -28,6 +28,7 @@ class Saldo extends Model
     protected $fillable = [
         'id_pengguna',
         'jumlah_saldo',
+        'saldo_tertahan',
         'tgl_update',
     ];
 

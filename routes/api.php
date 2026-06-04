@@ -44,6 +44,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/saldo',                [SaldoController::class, 'show']);
         Route::post('/saldo/tukar-koin',    [SaldoController::class, 'tukarKoin']);
         Route::post('/saldo/tarik',         [SaldoController::class, 'ajukanPenarikan']);
+        Route::post('/saldo/set-pin',       [SaldoController::class, 'setPin']);
 
         Route::get('/misi',                 [MisiController::class, 'index']);
         Route::post('/misi/{id}/klaim',     [MisiController::class, 'klaim']);

@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 
 class PenarikanSaldoResource extends Resource
@@ -53,28 +54,74 @@ class PenarikanSaldoResource extends Resource
                     ->color('success')->icon('heroicon-o-check-circle')->requiresConfirmation()
                     ->visible(fn ($record) => $record->status === 'pending')
                     ->action(function ($record) {
-                        DB::transaction(function () use ($record) {
-                            $record->update(['status' => 'disetujui']);
-                            Saldo::find($record->id_saldo)->decrement('jumlah_saldo', $record->jumlah_tarik);
-                            Notifikasi::create([
-                                'id_pengguna' => $record->id_pengguna,
-                                'judul'       => 'Penarikan Saldo Disetujui',
-                                'pesan'       => 'Penarikan Rp ' . number_format($record->jumlah_tarik) . ' telah disetujui.',
-                                'tipe'        => 'saldo',
-                            ]);
-                        });
+                        try {
+                            DB::transaction(function () use ($record) {
+                                $record->update(['status' => 'disetujui']);
+
+                                // Kurangi saldo_tertahan (dana keluar permanen)
+                                $saldo = Saldo::find($record->id_saldo);
+                                if ($saldo) {
+                                    $saldo->decrement('saldo_tertahan', $record->jumlah_tarik);
+                                    $saldo->update(['tgl_update' => now()]);
+                                }
+
+                                Notifikasi::create([
+                                    'id_pengguna' => $record->id_pengguna,
+                                    'judul'       => 'Penarikan Saldo Disetujui',
+                                    'pesan'       => 'Penarikan Rp ' . number_format($record->jumlah_tarik, 0, ',', '.') . ' telah disetujui dan dana dikirim.',
+                                    'tipe'        => 'saldo',
+                                ]);
+                            });
+
+                            Notification::make()
+                                ->title('Penarikan Disetujui')
+                                ->body('Dana Rp ' . number_format($record->jumlah_tarik, 0, ',', '.') . ' berhasil diproses.')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Gagal Menyetujui')
+                                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     }),
                 Tables\Actions\Action::make('tolak')->label('Tolak')
                     ->color('danger')->icon('heroicon-o-x-circle')->requiresConfirmation()
                     ->visible(fn ($record) => $record->status === 'pending')
                     ->action(function ($record) {
-                        $record->update(['status' => 'ditolak']);
-                        Notifikasi::create([
-                            'id_pengguna' => $record->id_pengguna,
-                            'judul'       => 'Penarikan Saldo Ditolak',
-                            'pesan'       => 'Penarikan Rp ' . number_format($record->jumlah_tarik) . ' ditolak.',
-                            'tipe'        => 'saldo',
-                        ]);
+                        try {
+                            DB::transaction(function () use ($record) {
+                                $record->update(['status' => 'ditolak']);
+
+                                // Refund: kembalikan saldo_tertahan ke saldo aktif
+                                $saldo = Saldo::find($record->id_saldo);
+                                if ($saldo) {
+                                    $saldo->decrement('saldo_tertahan', $record->jumlah_tarik);
+                                    $saldo->increment('jumlah_saldo', $record->jumlah_tarik);
+                                    $saldo->update(['tgl_update' => now()]);
+                                }
+
+                                Notifikasi::create([
+                                    'id_pengguna' => $record->id_pengguna,
+                                    'judul'       => 'Penarikan Saldo Ditolak',
+                                    'pesan'       => 'Penarikan Rp ' . number_format($record->jumlah_tarik, 0, ',', '.') . ' ditolak. Dana dikembalikan ke saldo Anda.',
+                                    'tipe'        => 'saldo',
+                                ]);
+                            });
+
+                            Notification::make()
+                                ->title('Penarikan Ditolak')
+                                ->body('Saldo Rp ' . number_format($record->jumlah_tarik, 0, ',', '.') . ' dikembalikan ke nasabah.')
+                                ->warning()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Gagal Menolak')
+                                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     }),
             ]);
     }

@@ -55,8 +55,10 @@ class DashboardController extends Controller
                     'no_telepon' => $user->no_telepon,
                 ],
                 'keuangan' => [
-                    'saldo' => $jumlahSaldo,
-                    'koin'  => $totalKoin,
+                    'saldo'          => $jumlahSaldo,
+                    'koin'           => $totalKoin,
+                    'saldo_tertahan' => $saldoRecord ? (double)$saldoRecord->saldo_tertahan : 0,
+                    'has_pin'        => !empty($user->pin),
                 ],
                 'ringkasan' => [
                     'total_setor' => $totalSetor,

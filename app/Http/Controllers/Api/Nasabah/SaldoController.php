@@ -7,6 +7,7 @@ use App\Models\{Saldo, Koin, PenarikanSaldo, Notifikasi, HargaCoin};
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class SaldoController extends Controller
 {
@@ -32,10 +33,48 @@ class SaldoController extends Controller
         return response()->json([
             'status' => true,
             'data'   => [
-                'saldo'            => $saldo,
-                'total_koin'       => $totalKoin,
+                'saldo'             => $saldo,
+                'total_koin'        => $totalKoin,
+                'saldo_tertahan'    => $saldo ? (double) $saldo->saldo_tertahan : 0,
+                'has_pin'           => !empty($request->user()->pin),
                 'riwayat_penarikan' => $riwayatPenarikan
             ]
+        ]);
+    }
+
+    /**
+     * Set PIN transaksi nasabah (6 digit).
+     * POST /api/nasabah/saldo/set-pin
+     */
+    public function setPin(Request $request): JsonResponse
+    {
+        $request->validate([
+            'pin' => 'required|digits:6',
+        ]);
+
+        $user = $request->user();
+
+        // Jika sudah punya PIN, harus verifikasi PIN lama dulu
+        if (!empty($user->pin)) {
+            $request->validate([
+                'pin_lama' => 'required|digits:6',
+            ]);
+
+            if (!Hash::check($request->pin_lama, $user->pin)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'PIN lama tidak sesuai.'
+                ], 422);
+            }
+        }
+
+        $user->update([
+            'pin' => Hash::make($request->pin),
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'PIN berhasil disimpan.'
         ]);
     }
 
@@ -77,7 +116,7 @@ class SaldoController extends Controller
             // 2. Tambah saldo (buat record jika belum ada)
             $saldo = Saldo::firstOrCreate(
                 ['id_pengguna' => $userId],
-                ['jumlah_saldo' => 0, 'tgl_update' => now()]
+                ['jumlah_saldo' => 0, 'saldo_tertahan' => 0, 'tgl_update' => now()]
             );
             $saldo->increment('jumlah_saldo', $nilaiSaldo);
             $saldo->update(['tgl_update' => now()]);
@@ -91,18 +130,42 @@ class SaldoController extends Controller
 
     /**
      * Mengajukan permintaan penarikan saldo ke rekening/e-wallet.
-     * POST /api/nasabah/tarik-saldo
+     * POST /api/nasabah/saldo/tarik
+     * 
+     * Menggunakan sistem Hold Balance:
+     * - Saldo aktif langsung dikurangi
+     * - Nominal dipindahkan ke saldo_tertahan
+     * - Admin menyetujui: saldo_tertahan dikurangi (dana keluar)
+     * - Admin menolak: saldo_tertahan dikembalikan ke saldo aktif
      */
     public function ajukanPenarikan(Request $request): JsonResponse
     {
         $request->validate([
             'jumlah_tarik' => 'required|numeric|min:10000',
-            'metode_bayar' => 'required|string', // Contoh: Dana, OVO, Transfer Bank
+            'metode_bayar' => 'required|string',
             'no_rekening'  => 'required|string',
+            'pin'          => 'required|digits:6',
         ]);
 
-        $userId = $request->user()->id;
-        $saldo  = Saldo::where('id_pengguna', $userId)->first();
+        $user   = $request->user();
+        $userId = $user->id;
+
+        // Verifikasi PIN
+        if (empty($user->pin)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Anda belum mengatur PIN transaksi. Silakan buat PIN terlebih dahulu.'
+            ], 422);
+        }
+
+        if (!Hash::check($request->pin, $user->pin)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'PIN yang Anda masukkan salah.'
+            ], 422);
+        }
+
+        $saldo = Saldo::where('id_pengguna', $userId)->first();
 
         if (!$saldo || $saldo->jumlah_saldo < $request->jumlah_tarik) {
             return response()->json([
@@ -111,29 +174,36 @@ class SaldoController extends Controller
             ], 422);
         }
 
-        // Simpan pengajuan penarikan
-        $penarikan = PenarikanSaldo::create([
-            'id_pengguna'  => $userId,
-            'id_saldo'     => $saldo->id,
-            'jumlah_tarik' => $request->jumlah_tarik,
-            'metode_bayar' => $request->metode_bayar,
-            'no_rekening'  => $request->no_rekening,
-            'status'       => 'pending',
-            'tgl_pengajuan' => now()
-        ]);
+        return DB::transaction(function () use ($request, $userId, $saldo) {
+            // 1. Hold Balance: kurangi saldo aktif, pindahkan ke saldo_tertahan
+            $saldo->decrement('jumlah_saldo', $request->jumlah_tarik);
+            $saldo->increment('saldo_tertahan', $request->jumlah_tarik);
+            $saldo->update(['tgl_update' => now()]);
 
-        // Opsional: Buat notifikasi otomatis untuk user
-        Notifikasi::create([
-            'id_pengguna'       => $userId,
-            'judul'             => 'Penarikan Diajukan',
-            'pesan'             => 'Permintaan penarikan Rp ' . number_format($request->jumlah_tarik) . ' sedang diproses.',
-            'status_notifikasi' => 'belum_dibaca'
-        ]);
+            // 2. Simpan pengajuan penarikan
+            PenarikanSaldo::create([
+                'id_pengguna'   => $userId,
+                'id_saldo'      => $saldo->id,
+                'jumlah_tarik'  => $request->jumlah_tarik,
+                'metode_bayar'  => $request->metode_bayar,
+                'no_rekening'   => $request->no_rekening,
+                'status'        => 'pending',
+                'tgl_pengajuan' => now()
+            ]);
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Permintaan penarikan berhasil diajukan. Mohon tunggu verifikasi admin.'
-        ]);
+            // 3. Buat notifikasi otomatis
+            Notifikasi::create([
+                'id_pengguna'       => $userId,
+                'judul'             => 'Penarikan Diajukan',
+                'pesan'             => 'Permintaan penarikan Rp ' . number_format($request->jumlah_tarik) . ' sedang diproses.',
+                'tipe'              => 'saldo',
+                'status_notifikasi' => 'belum_dibaca'
+            ]);
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Permintaan penarikan berhasil diajukan. Mohon tunggu verifikasi admin.'
+            ]);
+        });
     }
 }
-
