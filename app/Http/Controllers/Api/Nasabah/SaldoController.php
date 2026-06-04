@@ -27,17 +27,38 @@ class SaldoController extends Controller
         // Ambil 5 riwayat penarikan terakhir
         $riwayatPenarikan = PenarikanSaldo::where('id_pengguna', $userId)
             ->orderByDesc('created_at')
-            ->take(5)
+            ->take(20)
             ->get();
+
+        // Ambil harga koin yang aktif dari database, jika tidak ada default ke 100
+        $hargaCoinRecord = HargaCoin::where('status', 'aktif')->first();
+        $hargaPerKoin = $hargaCoinRecord ? (int) $hargaCoinRecord->harga_per_coin : 100;
+
+        // Ambil riwayat tukar koin (jumlah koin negatif)
+        $riwayatTukarKoin = Koin::where('id_pengguna', $userId)
+            ->where('jumlah_koin', '<', 0)
+            ->orderByDesc('tgl_diperoleh')
+            ->take(20)
+            ->get()
+            ->map(function ($item) use ($hargaPerKoin) {
+                $koin = abs($item->jumlah_koin);
+                return [
+                    'id'            => $item->id,
+                    'jumlah_koin'   => $koin,
+                    'nilai_saldo'   => $koin * $hargaPerKoin,
+                    'tgl_diperoleh' => $item->tgl_diperoleh,
+                ];
+            });
 
         return response()->json([
             'status' => true,
             'data'   => [
-                'saldo'             => $saldo,
-                'total_koin'        => $totalKoin,
-                'saldo_tertahan'    => $saldo ? (double) $saldo->saldo_tertahan : 0,
-                'has_pin'           => !empty($request->user()->pin),
-                'riwayat_penarikan' => $riwayatPenarikan
+                'saldo'              => $saldo,
+                'total_koin'         => $totalKoin,
+                'saldo_tertahan'     => $saldo ? (double) $saldo->saldo_tertahan : 0,
+                'has_pin'            => !empty($request->user()->pin),
+                'riwayat_penarikan'  => $riwayatPenarikan,
+                'riwayat_tukar_koin' => $riwayatTukarKoin
             ]
         ]);
     }

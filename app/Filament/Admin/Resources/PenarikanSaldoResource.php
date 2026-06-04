@@ -61,8 +61,9 @@ class PenarikanSaldoResource extends Resource
                                 // Kurangi saldo_tertahan (dana keluar permanen)
                                 $saldo = Saldo::find($record->id_saldo);
                                 if ($saldo) {
-                                    $saldo->decrement('saldo_tertahan', $record->jumlah_tarik);
-                                    $saldo->update(['tgl_update' => now()]);
+                                    $saldo->saldo_tertahan = (double) $saldo->saldo_tertahan - (double) $record->jumlah_tarik;
+                                    $saldo->tgl_update = now();
+                                    $saldo->save();
                                 }
 
                                 Notifikasi::create([
@@ -97,9 +98,10 @@ class PenarikanSaldoResource extends Resource
                                 // Refund: kembalikan saldo_tertahan ke saldo aktif
                                 $saldo = Saldo::find($record->id_saldo);
                                 if ($saldo) {
-                                    $saldo->decrement('saldo_tertahan', $record->jumlah_tarik);
-                                    $saldo->increment('jumlah_saldo', $record->jumlah_tarik);
-                                    $saldo->update(['tgl_update' => now()]);
+                                    $saldo->saldo_tertahan = (double) $saldo->saldo_tertahan - (double) $record->jumlah_tarik;
+                                    $saldo->jumlah_saldo = (double) $saldo->jumlah_saldo + (double) $record->jumlah_tarik;
+                                    $saldo->tgl_update = now();
+                                    $saldo->save();
                                 }
 
                                 Notifikasi::create([

@@ -42,8 +42,9 @@ class PenarikanController extends Controller
 
             // 2. Kurangi saldo_tertahan (dana keluar secara permanen)
             $saldo = Saldo::findOrFail($p->id_saldo);
-            $saldo->decrement('saldo_tertahan', $p->jumlah_tarik);
-            $saldo->update(['tgl_update' => now()]);
+            $saldo->saldo_tertahan = (double) $saldo->saldo_tertahan - (double) $p->jumlah_tarik;
+            $saldo->tgl_update = now();
+            $saldo->save();
 
             // 3. Beri Notifikasi
             Notifikasi::create([
@@ -75,9 +76,10 @@ class PenarikanController extends Controller
 
             // 2. Refund: kembalikan saldo_tertahan ke saldo aktif
             $saldo = Saldo::findOrFail($p->id_saldo);
-            $saldo->decrement('saldo_tertahan', $p->jumlah_tarik);
-            $saldo->increment('jumlah_saldo', $p->jumlah_tarik);
-            $saldo->update(['tgl_update' => now()]);
+            $saldo->saldo_tertahan = (double) $saldo->saldo_tertahan - (double) $p->jumlah_tarik;
+            $saldo->jumlah_saldo = (double) $saldo->jumlah_saldo + (double) $p->jumlah_tarik;
+            $saldo->tgl_update = now();
+            $saldo->save();
 
             // 3. Notifikasi
             Notifikasi::create([
