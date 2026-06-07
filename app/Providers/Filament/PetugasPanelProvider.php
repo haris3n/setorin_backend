@@ -30,6 +30,9 @@ class PetugasPanelProvider extends PanelProvider
             ->path('petugas')
             ->login(\App\Filament\Petugas\Pages\Auth\Login::class)
             ->brandName('Setor.in Petugas')
+            ->brandLogo(asset('images/logo.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon.svg'))
             ->colors([
                 'primary' => Color::hex('#16A34A'),
                 'success' => Color::hex('#16A34A'),

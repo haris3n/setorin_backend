@@ -35,6 +35,9 @@ class AdminPanelProvider extends PanelProvider
                 'danger'  => Color::hex('#EF4444'),
             ])
             ->brandName('Setor.in Admin')
+            ->brandLogo(asset('images/logo.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon.svg'))
             ->discoverResources(
                 in: app_path('Filament/Admin/Resources'),
                 for: 'App\\Filament\\Admin\\Resources'
