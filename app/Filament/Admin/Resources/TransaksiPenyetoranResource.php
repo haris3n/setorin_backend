@@ -61,6 +61,6 @@ class TransaksiPenyetoranResource extends Resource
     public static function getRelations(): array { return []; }
     public static function getPages(): array
     {
-        return ['index' => Pages\ListTransaksiPenyetorans::route('/')];
+        return ['index' => Pages\ListTransaksiPenyetorans::route('/')]; //test
     }
 }
