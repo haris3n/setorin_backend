@@ -4,6 +4,8 @@ namespace App\Helpers;
 
 use App\Models\AktivitasAdmin;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Filament\Facades\Filament;
 
 class AdminActivityLogger
 {
@@ -19,15 +21,26 @@ class AdminActivityLogger
         ?array $dataBaru = null
     ): void {
         try {
-            // Gunakan Auth biasa dulu (Filament mungkin causing timeout)
-            $user = Auth::user();
+            Log::info('AdminActivityLogger: Starting log creation', [
+                'jenis' => $jenis,
+                'modul' => $modul,
+                'data_id' => $dataId,
+            ]);
+
+            // Try Filament auth first, fallback to regular Auth
+            $user = Filament::auth()->user() ?? Auth::user();
 
             if (!$user) {
-                \Log::warning('AdminActivityLogger: No authenticated user');
+                Log::warning('AdminActivityLogger: No authenticated user found');
                 return;
             }
 
-            AktivitasAdmin::create([
+            Log::info('AdminActivityLogger: User authenticated', [
+                'user_id' => $user->id,
+                'user_name' => $user->nama ?? 'N/A',
+            ]);
+
+            $logData = [
                 'id_pengguna' => $user->id,
                 'jenis_aktivitas' => $jenis,
                 'modul' => $modul,
@@ -36,10 +49,21 @@ class AdminActivityLogger
                 'data_lama' => $dataLama,
                 'data_baru' => $dataBaru,
                 'created_at' => now(),
+            ];
+
+            Log::info('AdminActivityLogger: Attempting to create log', $logData);
+
+            $aktivitas = AktivitasAdmin::create($logData);
+            
+            Log::info('AdminActivityLogger: Log created successfully', [
+                'aktivitas_id' => $aktivitas->id,
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('AdminActivityLogger Error: ' . $e->getMessage());
+            Log::error('AdminActivityLogger Error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
     }
 

@@ -8,6 +8,7 @@ use App\Models\Nasabah;
 use App\Models\Petugas;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Log;
 
 class EditUser extends EditRecord
 {
@@ -18,11 +19,23 @@ class EditUser extends EditRecord
         return [
             Actions\DeleteAction::make()
                 ->after(function () {
-                    AdminActivityLogger::delete(
-                        'User',
-                        $this->record->id,
-                        $this->record->nama . ' (' . ucfirst($this->record->role) . ')'
-                    );
+                    Log::info('EditUser: DeleteAction triggered', [
+                        'record_id' => $this->record->id,
+                        'record_nama' => $this->record->nama,
+                    ]);
+
+                    try {
+                        AdminActivityLogger::delete(
+                            'User',
+                            $this->record->id,
+                            $this->record->nama . ' (' . ucfirst($this->record->role) . ')'
+                        );
+                        Log::info('EditUser: Delete logged successfully');
+                    } catch (\Exception $e) {
+                        Log::error('EditUser: Failed to log delete', [
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                 }),
         ];
     }
@@ -63,10 +76,22 @@ class EditUser extends EditRecord
         }
 
         // Log aktivitas
-        AdminActivityLogger::update(
-            'User',
-            $record->id,
-            $record->nama . ' (' . ucfirst($record->role) . ')'
-        );
+        Log::info('EditUser: afterSave() triggered', [
+            'record_id' => $record->id,
+            'record_nama' => $record->nama,
+        ]);
+
+        try {
+            AdminActivityLogger::update(
+                'User',
+                $record->id,
+                $record->nama . ' (' . ucfirst($record->role) . ')'
+            );
+            Log::info('EditUser: Update logged successfully');
+        } catch (\Exception $e) {
+            Log::error('EditUser: Failed to log update', [
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

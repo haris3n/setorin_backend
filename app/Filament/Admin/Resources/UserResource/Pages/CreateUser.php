@@ -7,6 +7,7 @@ use App\Helpers\AdminActivityLogger;
 use App\Models\Nasabah;
 use App\Models\Petugas;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Log;
 
 class CreateUser extends CreateRecord
 {
@@ -35,10 +36,23 @@ class CreateUser extends CreateRecord
         }
 
         // Log aktivitas
-        AdminActivityLogger::create(
-            'User',
-            $record->id,
-            $record->nama . ' (' . ucfirst($record->role) . ')'
-        );
+        Log::info('CreateUser: afterCreate() triggered', [
+            'record_id' => $record->id,
+            'record_nama' => $record->nama,
+            'role' => $record->role,
+        ]);
+
+        try {
+            AdminActivityLogger::create(
+                'User',
+                $record->id,
+                $record->nama . ' (' . ucfirst($record->role) . ')'
+            );
+            Log::info('CreateUser: AdminActivityLogger called successfully');
+        } catch (\Exception $e) {
+            Log::error('CreateUser: Failed to log activity', [
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
