@@ -28,6 +28,7 @@ class PetugasPanelProvider extends PanelProvider
         return $panel
             ->id('petugas')
             ->path('petugas')
+            ->spa()
             ->login(\App\Filament\Petugas\Pages\Auth\Login::class)
             ->brandName('Setor.in Petugas')
             ->brandLogo(asset('images/logo.png'))

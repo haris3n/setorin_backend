@@ -2,6 +2,7 @@
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\PenarikanSaldoResource\Pages;
+use App\Helpers\AdminActivityLogger;
 use App\Models\PenarikanSaldo;
 use App\Models\Saldo;
 use App\Models\Notifikasi;
@@ -79,6 +80,13 @@ class PenarikanSaldoResource extends Resource
                                 ->body('Dana Rp ' . number_format($record->jumlah_tarik, 0, ',', '.') . ' berhasil diproses.')
                                 ->success()
                                 ->send();
+
+                            AdminActivityLogger::log(
+                                'update',
+                                'Menyetujui penarikan saldo Rp ' . number_format($record->jumlah_tarik, 0, ',', '.') . ' atas nama ' . ($record->pengguna?->nama ?? '-'),
+                                'Penarikan Saldo',
+                                $record->id
+                            );
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->title('Gagal Menyetujui')
@@ -117,6 +125,13 @@ class PenarikanSaldoResource extends Resource
                                 ->body('Saldo Rp ' . number_format($record->jumlah_tarik, 0, ',', '.') . ' dikembalikan ke nasabah.')
                                 ->warning()
                                 ->send();
+
+                            AdminActivityLogger::log(
+                                'update',
+                                'Menolak penarikan saldo Rp ' . number_format($record->jumlah_tarik, 0, ',', '.') . ' atas nama ' . ($record->pengguna?->nama ?? '-'),
+                                'Penarikan Saldo',
+                                $record->id
+                            );
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->title('Gagal Menolak')

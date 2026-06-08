@@ -33,15 +33,15 @@ class KontenEdukasiResource extends Resource
                     ->maxLength(255)
                     ->label('Judul Artikel')
                     ->columnSpanFull(),
-                
+
                 Forms\Components\Select::make('kategori')
                     ->options([
-                        'Kertas'      => 'Kertas',
-                        'Plastik'     => 'Plastik',
-                        'Kaca'        => 'Kaca',
-                        'Organik'     => 'Organik',
-                        'Logam'       => 'Logam',
-                        'Elektronik'  => 'Elektronik',
+                        'Kertas'     => 'Kertas',
+                        'Plastik'    => 'Plastik',
+                        'Kaca'       => 'Kaca',
+                        'Organik'    => 'Organik',
+                        'Logam'      => 'Logam',
+                        'Elektronik' => 'Elektronik',
                     ])
                     ->required()
                     ->label('Kategori Sampah')
@@ -55,19 +55,23 @@ class KontenEdukasiResource extends Resource
 
                 Forms\Components\Select::make('status')
                     ->options([
-                        'draft' => 'Draft', 
-                        'published' => 'Published', 
-                        'archived' => 'Archived'
+                        'draft'     => 'Draft',
+                        'published' => 'Published',
+                        'archived'  => 'Archived',
                     ])
                     ->default('draft')
                     ->required()
                     ->label('Status')
                     ->native(false),
 
-                Forms\Components\RichEditor::make('isi')
+                // Textarea (bukan RichEditor) agar teks tampil bersih di aplikasi Flutter
+                Forms\Components\Textarea::make('isi')
                     ->required()
                     ->label('Isi Artikel')
-                    ->columnSpanFull(),
+                    ->rows(15)
+                    ->columnSpanFull()
+                    ->helperText('Tulis teks biasa. Jangan gunakan format HTML karena akan ditampilkan apa adanya di aplikasi mobile.'),
+
             ])->columns(2),
         ]);
     }
@@ -80,22 +84,21 @@ class KontenEdukasiResource extends Resource
                     ->searchable()
                     ->limit(50)
                     ->label('Judul'),
-                
+
                 Tables\Columns\TextColumn::make('kategori')
                     ->badge()
                     ->label('Kategori'),
 
-                // Pastikan relasi di model bernama 'pengguna' atau 'user'
                 Tables\Columns\TextColumn::make('pengguna.nama')
                     ->label('Dibuat oleh'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'draft' => 'gray', 
-                        'published' => 'success', 
-                        'archived' => 'warning', 
-                        default => 'gray',
+                        'draft'     => 'gray',
+                        'published' => 'success',
+                        'archived'  => 'warning',
+                        default     => 'gray',
                     }),
 
                 Tables\Columns\TextColumn::make('tgl_publikasi')
@@ -106,34 +109,36 @@ class KontenEdukasiResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'draft' => 'Draft', 
-                        'published' => 'Published', 
-                        'archived' => 'Archived'
+                        'draft'     => 'Draft',
+                        'published' => 'Published',
+                        'archived'  => 'Archived',
                     ]),
                 Tables\Filters\SelectFilter::make('kategori')
                     ->options([
-                        'Kertas'      => 'Kertas',
-                        'Plastik'     => 'Plastik',
-                        'Kaca'        => 'Kaca',
-                        'Organik'     => 'Organik',
-                        'Logam'       => 'Logam',
-                        'Elektronik'  => 'Elektronik',
+                        'Kertas'     => 'Kertas',
+                        'Plastik'    => 'Plastik',
+                        'Kaca'       => 'Kaca',
+                        'Organik'    => 'Organik',
+                        'Logam'      => 'Logam',
+                        'Elektronik' => 'Elektronik',
                     ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                
-                // Action untuk mempublikasikan artikel dengan cepat
+
+                // Quick publish action
                 Tables\Actions\Action::make('publish')
                     ->label('Publish')
                     ->icon('heroicon-o-globe-alt')
                     ->color('success')
                     ->requiresConfirmation()
                     ->visible(fn ($record) => $record->status !== 'published')
-                    ->action(fn ($record) => $record->update([
-                        'status' => 'published', 
-                        'tgl_publikasi' => now()
-                    ])),
+                    ->action(function ($record) {
+                        $record->update([
+                            'status'        => 'published',
+                            'tgl_publikasi' => now(),
+                        ]);
+                    }),
 
                 Tables\Actions\DeleteAction::make(),
             ]);
@@ -142,8 +147,7 @@ class KontenEdukasiResource extends Resource
     public static function getPages(): array
     {
         return [
-            // Perhatikan nama class List di sini (harus sesuai file)
-            'index'  => Pages\ListKontenEdukasis::route('/'), 
+            'index'  => Pages\ListKontenEdukasis::route('/'),
             'create' => Pages\CreateKontenEdukasi::route('/create'),
             'edit'   => Pages\EditKontenEdukasi::route('/{record}/edit'),
         ];

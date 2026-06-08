@@ -26,6 +26,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->id('admin')
             ->path('admin')
+            ->spa()
             ->login(\App\Filament\Admin\Pages\Auth\Login::class)
             ->colors([
                 'primary' => Color::hex('#16A34A'),

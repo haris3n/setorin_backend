@@ -26,7 +26,37 @@ class AktivitasAdminResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form->schema([]);
+        return $form->schema([
+            Forms\Components\Section::make('Detail Aktivitas')->schema([
+                Forms\Components\TextInput::make('jenis_aktivitas')
+                    ->label('Jenis Aktivitas')
+                    ->disabled(),
+
+                Forms\Components\TextInput::make('modul')
+                    ->label('Modul')
+                    ->disabled(),
+
+                Forms\Components\TextInput::make('deskripsi')
+                    ->label('Deskripsi')
+                    ->disabled(),
+
+                Forms\Components\TextInput::make('created_at')
+                    ->label('Waktu')
+                    ->disabled(),
+            ])->columns(2),
+
+            Forms\Components\Section::make('Data Perubahan')->schema([
+                Forms\Components\KeyValue::make('data_lama')
+                    ->label('Data Sebelum')
+                    ->disabled()
+                    ->columnSpanFull(),
+
+                Forms\Components\KeyValue::make('data_baru')
+                    ->label('Data Sesudah')
+                    ->disabled()
+                    ->columnSpanFull(),
+            ]),
+        ]);
     }
 
     public static function table(Table $table): Table
