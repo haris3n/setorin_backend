@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AktivitasAdmin extends Model
 {
     protected $table = 'aktivitas_admin';
+    
+    // Nonaktifkan updated_at karena table hanya punya created_at
+    public $timestamps = false;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'id_pengguna',
@@ -22,6 +27,7 @@ class AktivitasAdmin extends Model
     protected $casts = [
         'data_lama' => 'array',
         'data_baru' => 'array',
+        'created_at' => 'datetime',
     ];
 
     public function pengguna(): BelongsTo
@@ -49,6 +55,7 @@ class AktivitasAdmin extends Model
             'deskripsi' => $deskripsi,
             'data_lama' => $dataLama,
             'data_baru' => $dataBaru,
+            'created_at' => now(),
         ]);
     }
 }

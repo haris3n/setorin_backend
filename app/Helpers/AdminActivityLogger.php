@@ -18,21 +18,29 @@ class AdminActivityLogger
         ?array $dataLama = null,
         ?array $dataBaru = null
     ): void {
-        $user = Auth::user();
+        try {
+            // Gunakan Auth biasa dulu (Filament mungkin causing timeout)
+            $user = Auth::user();
 
-        if (!$user) {
-            return;
+            if (!$user) {
+                \Log::warning('AdminActivityLogger: No authenticated user');
+                return;
+            }
+
+            AktivitasAdmin::create([
+                'id_pengguna' => $user->id,
+                'jenis_aktivitas' => $jenis,
+                'modul' => $modul,
+                'data_id' => $dataId,
+                'deskripsi' => $deskripsi,
+                'data_lama' => $dataLama,
+                'data_baru' => $dataBaru,
+                'created_at' => now(),
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('AdminActivityLogger Error: ' . $e->getMessage());
         }
-
-        AktivitasAdmin::log(
-            $user->id,
-            $jenis,
-            $deskripsi,
-            $modul,
-            $dataId,
-            $dataLama,
-            $dataBaru
-        );
     }
 
     /**
@@ -59,5 +67,3 @@ class AdminActivityLogger
         self::log('delete', "Menghapus data {$modul}: {$namaData}", $modul, $dataId);
     }
 }
-
-// tes
