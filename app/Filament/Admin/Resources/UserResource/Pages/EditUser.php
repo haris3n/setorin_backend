@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\UserResource\Pages;
 
 use App\Filament\Admin\Resources\UserResource;
+use App\Helpers\AdminActivityLogger;
 use App\Models\Nasabah;
 use App\Models\Petugas;
 use Filament\Actions;
@@ -15,7 +16,14 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->after(function () {
+                    AdminActivityLogger::delete(
+                        'User',
+                        $this->record->id,
+                        $this->record->nama . ' (' . ucfirst($this->record->role) . ')'
+                    );
+                }),
         ];
     }
 
@@ -53,5 +61,12 @@ class EditUser extends EditRecord
                 ['id_bank_sampah' => $bankSampahId]
             );
         }
+
+        // Log aktivitas
+        AdminActivityLogger::update(
+            'User',
+            $record->id,
+            $record->nama . ' (' . ucfirst($record->role) . ')'
+        );
     }
 }

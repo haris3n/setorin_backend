@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\UserResource\Pages;
 
 use App\Filament\Admin\Resources\UserResource;
+use App\Helpers\AdminActivityLogger;
 use App\Models\Nasabah;
 use App\Models\Petugas;
 use Filament\Resources\Pages\CreateRecord;
@@ -32,5 +33,12 @@ class CreateUser extends CreateRecord
                 ]
             );
         }
+
+        // Log aktivitas
+        AdminActivityLogger::create(
+            'User',
+            $record->id,
+            $record->nama . ' (' . ucfirst($record->role) . ')'
+        );
     }
 }

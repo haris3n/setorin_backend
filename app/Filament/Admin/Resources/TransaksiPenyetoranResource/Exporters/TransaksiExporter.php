@@ -9,6 +9,8 @@ use Filament\Actions\Exports\Models\Export;
 
 class TransaksiExporter extends Exporter
 {
+    protected static ?string $model = TransaksiPenyetoran::class;
+
     public static function getColumns(): array
     {
         return [
