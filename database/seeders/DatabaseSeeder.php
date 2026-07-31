@@ -11,8 +11,11 @@ class DatabaseSeeder extends Seeder
     {
         // Buat Role dulu
         $roles = ['admin', 'petugas', 'nasabah'];
+        $guards = ['web', 'api'];
         foreach ($roles as $role) {
-            Role::firstOrCreate(['name' => $role, 'guard_name' => 'api']);
+            foreach ($guards as $guard) {
+                Role::firstOrCreate(['name' => $role, 'guard_name' => $guard]);
+            }
         }
 
         // Baru panggil seeder lainnya
