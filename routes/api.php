@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Nasabah\{ProfilController, TransaksiController, Sal
 use App\Http\Controllers\Api\Petugas\{TransaksiPetugasController, JadwalController};
 use App\Http\Controllers\Api\Admin\{PenggunaController, BankSampahController, HargaSampahController, MisiAdminController, PenarikanController, LaporanController};
 use App\Http\Controllers\Api\Admin\KontenEdukasiController;
+use App\Http\Controllers\Api\Admin\PengumumanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,7 @@ Route::middleware('throttle:login')->post('/login',      [AuthController::class,
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/pengumuman', [\App\Http\Controllers\Api\PengumumanController::class, 'index']);
 
     // ── NASABAH ──────────────────────────────────────────────
     Route::middleware('role:nasabah')->prefix('nasabah')->group(function () {
@@ -64,6 +66,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::apiResource('/bank-sampah',   BankSampahController::class);
         Route::apiResource('/harga-sampah',  HargaSampahController::class);
         Route::apiResource('/misi',          MisiAdminController::class);
+        Route::apiResource('/pengumuman',    PengumumanController::class);
 
         Route::get('/penarikan',             [PenarikanController::class, 'index']);
         Route::put('/penarikan/{id}/setujui', [PenarikanController::class, 'setujui']);
